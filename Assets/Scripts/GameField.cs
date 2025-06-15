@@ -13,6 +13,12 @@ public class GameField : MonoBehaviour
     [SerializeField] private Tile tileToast;
     [SerializeField] private Tile tileMafin;
     [SerializeField] private Tile tilePancake;
+    [SerializeField] private Tile tileCake;
+    [SerializeField] private Tile tileDoubleCake;
+    [SerializeField] private Tile tileDoubleGlazurCake;
+    [SerializeField] private Tile tileGingerbreadMan;
+    [SerializeField] private Tile tileGingerbreadManCoctail;
+    [SerializeField] private Tile tileGingerbreadManSet;
 
     public Tilemap Tilemap => tilemap;
     public Tilemap TilemapOverlay => tilemapOverlay;
@@ -79,6 +85,18 @@ public class GameField : MonoBehaviour
                 return tileMafin;
             case Cell.CookieType.pankeki:
                 return tilePancake;
+            case Cell.CookieType.cake:
+                return tileCake;
+            case Cell.CookieType.doubleCake:
+                return tileDoubleCake;
+            case Cell.CookieType.doubleGlazurCake:
+                return tileDoubleGlazurCake;
+            case Cell.CookieType.gingerbreadMan:
+                return tileGingerbreadMan;
+            case Cell.CookieType.gingerbreadManCoctail:
+                return tileGingerbreadManCoctail;
+            case Cell.CookieType.gingerbreadManSet:
+                return tileGingerbreadManSet;
             default: return null;
         }
     }
@@ -112,6 +130,10 @@ public class GameField : MonoBehaviour
         else if (name == "pancake")
         {
             return tilePancake;
+        }
+        else if (name == "gingerbreadMan")
+        {
+            return tileGingerbreadMan;
         }
         else
         {

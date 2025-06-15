@@ -593,6 +593,12 @@ MonoBehaviour:
   tileToast: {fileID: 11400000, guid: 7cb1ef6b70bb3874886b2c1ded44114f, type: 2}
   tileMafin: {fileID: 11400000, guid: 970fadb4e7692154783ed502df83ad1b, type: 2}
   tilePancake: {fileID: 11400000, guid: bdd65edb37332364ea08bd62fd71919e, type: 2}
+  tileCake: {fileID: 11400000, guid: cf884adbfb4370c4f8d28481a65eda82, type: 2}
+  tileDoubleCake: {fileID: 11400000, guid: d9e7c940636aa6841b9716a87869334d, type: 2}
+  tileDoubleGlazurCake: {fileID: 11400000, guid: 8274ca7207a61a845ae34eacce8c94fb, type: 2}
+  tileGingerbreadMan: {fileID: 11400000, guid: 92eacb9d821f4c0448d5e9a3c17ce617, type: 2}
+  tileGingerbreadManCoctail: {fileID: 11400000, guid: 7330fed4dc3e8cd429207228cf3d9b33, type: 2}
+  tileGingerbreadManSet: {fileID: 11400000, guid: 9a26478a6acca0340a7e903a225843bf, type: 2}
   tileEmpty: {fileID: 11400000, guid: af5d9c44c425cf440a25d139b37e6ae8, type: 2}
   cookie: {fileID: 11400000, guid: 0ede90b22401970409bfa83804a80b6f, type: 2}
 --- !u!483693784 &1764680178

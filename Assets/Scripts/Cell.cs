@@ -19,12 +19,19 @@ public class Cell
         cake,
         doubleCake,
         doubleGlazurCake,
+        gingerbreadMan,
+        gingerbreadManCoctail,
+        gingerbreadManSet,
         unknown
     }
 
     public void Merge()
     {
         if (cookieType < CookieType.doubleGlazurCake)
+        {
+            cookieType++;
+        }
+        if (cookieType > CookieType.doubleGlazurCake && cookieType < CookieType.unknown)
         {
             cookieType++;
         }

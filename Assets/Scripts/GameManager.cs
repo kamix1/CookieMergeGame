@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private GameField gameField;
     private string nextPlaceble;
-    private string[] cookies = { "cookie", "toast", "mafin", "pancake" };
+    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadMan"};
     private double[] cookiesProbability = { 0.8, 0.9, 0.95, 1 };
     Vector3Int clickedCellPosition;
 
@@ -45,7 +45,8 @@ public class GameManager : MonoBehaviour
         System.Random random = new System.Random();
         double number = random.NextDouble();
 
-        if (number < 0.8) nextPlaceble = cookies[0];
+        if (number < 0.6) nextPlaceble = cookies[0];
+        else if (number < 0.8) nextPlaceble = cookies[4];
         else if (number < 0.9) nextPlaceble = cookies[1];
         else if (number < 0.95) nextPlaceble = cookies[2];
         else nextPlaceble = cookies[3];
@@ -168,6 +169,8 @@ public class GameManager : MonoBehaviour
             "toast" => Cell.CookieType.toast,
             "mafin" => Cell.CookieType.mafin,
             "pancake" => Cell.CookieType.pankeki,
+            "cake" => Cell.CookieType.cake,
+            "gingerbreadMan" => Cell.CookieType.gingerbreadMan,
             _ => Cell.CookieType.unknown,
         };
     }
