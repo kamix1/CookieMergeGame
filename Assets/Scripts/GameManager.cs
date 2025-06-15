@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadMan"};
     private double[] cookiesProbability = { 0.8, 0.9, 0.95, 1 };
     Vector3Int clickedCellPosition;
+    private System.Random random = new System.Random();
 
     void Start()
     {
@@ -70,6 +71,7 @@ public class GameManager : MonoBehaviour
             if (cellsArray[y, x].isEmpty)
             {
                 Placing();
+                GingerbreadManAliveBehavior();
                 GeneratePlacibleObject();
                 gameField.UpdateVisual(cellsArray);
             }
@@ -161,6 +163,75 @@ public class GameManager : MonoBehaviour
         return count;
     }
 
+    private void GingerbreadManAliveBehavior()
+    {
+        List<Cell> gingerbreadList = new();
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (cellsArray[y, x].cookieType == Cell.CookieType.gingerbreadManAlive)
+                {
+                    gingerbreadList.Add(cellsArray[y, x]);
+                }
+            }
+        }
+
+        foreach (Cell cell in gingerbreadList)
+        {
+            Vector3 dir = MoveRandomDirection(cell);
+            Vector3Int newPos = cell.cellPosition + Vector3Int.RoundToInt(dir);
+
+            if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty)
+            {
+                cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+                {
+                    isEmpty = true,
+                    isPlayable = true,
+                    type = Cell.CellType.empty,
+                    cookieType = Cell.CookieType.unknown,
+                    cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
+                };
+
+                cell.cellPosition = newPos;
+                cellsArray[newPos.y, newPos.x] = cell;
+            }
+            else
+            {
+                cell.cookieType = Cell.CookieType.gingerbreadMan;
+                Merge(cell);
+            }
+        }
+    }
+
+    private Vector3 MoveRandomDirection(Cell cell)
+    {
+        List<Vector3> directions = new List<Vector3>()
+    {
+        new Vector3(1, 0, 0),
+        new Vector3(-1, 0, 0),  
+        new Vector3(0, 1, 0),   
+        new Vector3(0, -1, 0)   
+    };
+
+        for (int i = directions.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(0, i + 1);
+            Vector3 temp = directions[i];
+            directions[i] = directions[j];
+            directions[j] = temp;
+        }
+
+        foreach (var dir in directions)
+        {
+            Vector3Int newPos = cell.cellPosition + Vector3Int.RoundToInt(dir);
+            if (InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty)
+                return dir;
+        }
+
+        return Vector3.zero;
+    }
     private Cell.CookieType Metamorfosis(string str)
     {
         return str switch
@@ -170,7 +241,7 @@ public class GameManager : MonoBehaviour
             "mafin" => Cell.CookieType.mafin,
             "pancake" => Cell.CookieType.pankeki,
             "cake" => Cell.CookieType.cake,
-            "gingerbreadMan" => Cell.CookieType.gingerbreadMan,
+            "gingerbreadMan" => Cell.CookieType.gingerbreadManAlive,
             _ => Cell.CookieType.unknown,
         };
     }

@@ -597,6 +597,7 @@ MonoBehaviour:
   tileDoubleCake: {fileID: 11400000, guid: d9e7c940636aa6841b9716a87869334d, type: 2}
   tileDoubleGlazurCake: {fileID: 11400000, guid: 8274ca7207a61a845ae34eacce8c94fb, type: 2}
   tileGingerbreadMan: {fileID: 11400000, guid: 92eacb9d821f4c0448d5e9a3c17ce617, type: 2}
+  tileGingerbreadManAlive: {fileID: 11400000, guid: f317d413fb0aa4d4c8ef2a88e848f12f, type: 2}
   tileGingerbreadManCoctail: {fileID: 11400000, guid: 7330fed4dc3e8cd429207228cf3d9b33, type: 2}
   tileGingerbreadManSet: {fileID: 11400000, guid: 9a26478a6acca0340a7e903a225843bf, type: 2}
   tileEmpty: {fileID: 11400000, guid: af5d9c44c425cf440a25d139b37e6ae8, type: 2}
