@@ -26,6 +26,7 @@ public class GameField : MonoBehaviour
     public Tilemap TilemapVisual => tilemapVisual;
 
     [SerializeField] public Tile tileEmpty;
+    [SerializeField] public Tile tilePlate;
     [SerializeField] public Tile cookie;
     // Start is called before the first frame update
     private void Awake()
@@ -71,6 +72,8 @@ public class GameField : MonoBehaviour
         {
             case Cell.CellType.empty:
                 return tileEmpty;
+            case Cell.CellType.plate:
+                return tilePlate;
             default: return null;
         }
     }
@@ -134,9 +137,9 @@ public class GameField : MonoBehaviour
         {
             return tilePancake;
         }
-        else if (name == "gingerbreadMan")
+        else if (name == "gingerbreadManAlive")
         {
-            return tileGingerbreadMan;
+            return tileGingerbreadManAlive;
         }
         else
         {

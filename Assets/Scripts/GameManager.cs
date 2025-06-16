@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private GameField gameField;
     private string nextPlaceble;
-    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadMan"};
+    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive" };
     private double[] cookiesProbability = { 0.8, 0.9, 0.95, 1 };
     Vector3Int clickedCellPosition;
     private System.Random random = new System.Random();
@@ -31,6 +31,16 @@ public class GameManager : MonoBehaviour
             for (int x = 0; x < width; x++)
             {
                 Cell cell = new();
+                if (y == height-1 && x == 0)
+                {
+                    cell.isPlayable = true;
+                    cell.cookieType = Cell.CookieType.unknown;
+                    cell.cellPosition = new Vector3Int(x, y);
+                    cell.type = Cell.CellType.plate;
+                    cell.isEmpty = true;
+                    cellsArray[y, x] = cell;
+                    continue;
+                }
                 cell.isPlayable = true;
                 cell.cookieType = Cell.CookieType.unknown;
                 cell.cellPosition = new Vector3Int(x, y);
@@ -68,17 +78,29 @@ public class GameManager : MonoBehaviour
             clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
             int x = clickedCellPosition.x;
             int y = clickedCellPosition.y;
-            if (clickedCellPosition == cellsArray[0, 0].cellPosition)
+            if (clickedCellPosition == cellsArray[height-1, 0].cellPosition)
             {
-
+                if(cellsArray[y, x].isEmpty)
+                {
+                    Placing();
+                    GingerbreadManAliveBehavior();
+                    GeneratePlacibleObject();
+                    gameField.UpdateVisual(cellsArray);
+                }
+                else
+                {
+                    SwapPlateCookie(cellsArray[y, x]);
+                }
+                Debug.Log("clicked on plate");
             }
-            if (cellsArray[y, x].isEmpty)
+            else if (cellsArray[y, x].isEmpty)
             {
                 Placing();
                 GingerbreadManAliveBehavior();
                 GeneratePlacibleObject();
-                gameField.UpdateVisual(cellsArray);
+                
             }
+            gameField.UpdateVisual(cellsArray);
         }
 
         if (Input.GetMouseButtonDown(1))
@@ -96,6 +118,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void SwapPlateCookie(Cell plate)
+    {
+        Cell.CookieType currentPlateCookieType = plate.cookieType;
+        plate.cookieType = Metamorfosis(nextPlaceble);
+        nextPlaceble = ReverseMetamorfosis(currentPlateCookieType);
+    }
     private void Placing()
     {
         Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -107,6 +135,7 @@ public class GameManager : MonoBehaviour
         {
             Cell clickedCell = cellsArray[y, x];
             clickedCell.isEmpty = false;
+            if(clickedCell.type != Cell.CellType.plate)
             clickedCell.type = Cell.CellType.cookie;
             clickedCell.cookieType = Metamorfosis(nextPlaceble);
             Merge(clickedCell);
@@ -152,6 +181,7 @@ public class GameManager : MonoBehaviour
 
     private int CheckNearest(int x, int y, Cell.CookieType targetType, bool[,] visited)
     {
+        if (y == height - 1 && x == 0) return 0;
         if (targetType == Cell.CookieType.gingerbreadManAlive) return 0;
         if (!InRange(x, y)) return 0;
         if (visited[y, x]) return 0;
@@ -188,43 +218,47 @@ public class GameManager : MonoBehaviour
             Vector3 dir = MoveRandomDirection(cell);
             Vector3Int newPos = cell.cellPosition + Vector3Int.RoundToInt(dir);
 
-            if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty)
+            if (cellsArray[cell.cellPosition.y, cell.cellPosition.x].type != Cell.CellType.plate) //если не в тарелке то использует логику
             {
-                cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+                Debug.Log(cellsArray[cell.cellPosition.y, cell.cellPosition.x].type);
+                if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty)
                 {
-                    isEmpty = true,
-                    isPlayable = true,
-                    type = Cell.CellType.empty,
-                    cookieType = Cell.CookieType.unknown,
-                    cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
-                };
+                    cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+                    {
+                        isEmpty = true,
+                        isPlayable = true,
+                        type = Cell.CellType.empty,
+                        cookieType = Cell.CookieType.unknown,
+                        cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
+                    };
 
-                cell.cellPosition = newPos;
-                cellsArray[newPos.y, newPos.x] = cell;
-            }
-            else
-            {
-                bool[,] checkedGingerbreadMan = new bool[height, width];
-                if(CheckNearestGingerbreadMans(cell, checkedGingerbreadMan))
-                {
-
+                    cell.cellPosition = newPos;
+                    cellsArray[newPos.y, newPos.x] = cell;
                 }
                 else
                 {
-                    for (int y = 0; y < height; y++)
+                    bool[,] checkedGingerbreadMan = new bool[height, width];
+                    if (CheckNearestGingerbreadMans(cell, checkedGingerbreadMan))
                     {
-                        for (int x = 0; x < width; x++)
+
+                    }
+                    else
+                    {
+                        for (int y = 0; y < height; y++)
                         {
-                            if(checkedGingerbreadMan[y,x] == true)
+                            for (int x = 0; x < width; x++)
                             {
-                                Debug.Log("x = " + x + "y =" + y);
-                                cellsArray[y, x].cookieType = Cell.CookieType.gingerbreadMan;
-                                cellsArray[y, x].isEmpty = false;
+                                if (checkedGingerbreadMan[y, x] == true)
+                                {
+                                    Debug.Log("x = " + x + "y =" + y);
+                                    cellsArray[y, x].cookieType = Cell.CookieType.gingerbreadMan;
+                                    cellsArray[y, x].isEmpty = false;
+                                }
                             }
                         }
+                        Merge(cell);
+                        gameField.UpdateVisual(cellsArray);
                     }
-                    Merge(cell);
-                    gameField.UpdateVisual(cellsArray);
                 }
             }
         }
@@ -295,7 +329,7 @@ public class GameManager : MonoBehaviour
         foreach (var dir in directions)
         {
             Vector3Int newPos = cell.cellPosition + Vector3Int.RoundToInt(dir);
-            if (InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty)
+            if (InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty && cellsArray[newPos.y, newPos.x].type != Cell.CellType.plate)
                 return dir;
         }
 
@@ -310,8 +344,22 @@ public class GameManager : MonoBehaviour
             "mafin" => Cell.CookieType.mafin,
             "pancake" => Cell.CookieType.pankeki,
             "cake" => Cell.CookieType.cake,
-            "gingerbreadMan" => Cell.CookieType.gingerbreadManAlive,
+            "gingerbreadManAlive" => Cell.CookieType.gingerbreadManAlive,
             _ => Cell.CookieType.unknown,
+        };
+    }
+
+    private string ReverseMetamorfosis(Cell.CookieType type)
+    {
+        return type switch
+        {
+            Cell.CookieType.cookie => "cookie",
+            Cell.CookieType.toast => "toast",
+            Cell.CookieType.mafin => "mafin",
+            Cell.CookieType.pankeki => "pancake",
+            Cell.CookieType.cake => "cake",
+            Cell.CookieType.gingerbreadManAlive => "gingerbreadManAlive",
+            _ => "unknown",
         };
     }
 

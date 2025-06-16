@@ -199,7 +199,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 355377659}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 4.24, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -601,6 +601,7 @@ MonoBehaviour:
   tileGingerbreadManCoctail: {fileID: 11400000, guid: 7330fed4dc3e8cd429207228cf3d9b33, type: 2}
   tileGingerbreadManSet: {fileID: 11400000, guid: 9a26478a6acca0340a7e903a225843bf, type: 2}
   tileEmpty: {fileID: 11400000, guid: af5d9c44c425cf440a25d139b37e6ae8, type: 2}
+  tilePlate: {fileID: 11400000, guid: 210b8d1cf169e8b4490b0ba0fb08f9ab, type: 2}
   cookie: {fileID: 11400000, guid: 0ede90b22401970409bfa83804a80b6f, type: 2}
 --- !u!483693784 &1764680178
 TilemapRenderer:
