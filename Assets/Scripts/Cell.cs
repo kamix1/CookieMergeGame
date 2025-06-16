@@ -20,6 +20,7 @@ public class Cell
         doubleCake,
         doubleGlazurCake,
         gingerbreadManAlive,
+        gingerbreadJumperAlive,
         gingerbreadMan,
         gingerbreadManCoctail,
         gingerbreadManSet,
@@ -32,7 +33,7 @@ public class Cell
         {
             cookieType++;
         }
-        if (cookieType > CookieType.gingerbreadManAlive && cookieType < CookieType.unknown)
+        if (cookieType > CookieType.gingerbreadJumperAlive && cookieType < CookieType.unknown)
         {
             cookieType++;
         }

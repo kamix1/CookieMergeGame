@@ -18,6 +18,7 @@ public class GameField : MonoBehaviour
     [SerializeField] private Tile tileDoubleGlazurCake;
     [SerializeField] private Tile tileGingerbreadMan;
     [SerializeField] private Tile tileGingerbreadManAlive;
+    [SerializeField] private Tile tileGingerbreadJumperAlive;
     [SerializeField] private Tile tileGingerbreadManCoctail;
     [SerializeField] private Tile tileGingerbreadManSet;
 
@@ -97,6 +98,8 @@ public class GameField : MonoBehaviour
                 return tileDoubleGlazurCake;
             case Cell.CookieType.gingerbreadManAlive:
                 return tileGingerbreadManAlive;
+            case Cell.CookieType.gingerbreadJumperAlive:
+                return tileGingerbreadJumperAlive;
             case Cell.CookieType.gingerbreadMan:
                 return tileGingerbreadMan;
             case Cell.CookieType.gingerbreadManCoctail:
@@ -140,6 +143,10 @@ public class GameField : MonoBehaviour
         else if (name == "gingerbreadManAlive")
         {
             return tileGingerbreadManAlive;
+        }
+        else if (name == "gingerbreadJumperAlive")
+        {
+            return tileGingerbreadJumperAlive;
         }
         else
         {

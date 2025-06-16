@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -11,10 +12,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private GameField gameField;
     private string nextPlaceble;
-    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive" };
-    private double[] cookiesProbability = { 0.8, 0.9, 0.95, 1 };
+    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive", "gingerbreadJumperAlive" };
     Vector3Int clickedCellPosition;
     private System.Random random = new System.Random();
+    private bool[] usedIndices;
 
     void Start()
     {
@@ -57,8 +58,9 @@ public class GameManager : MonoBehaviour
         double number = random.NextDouble();
 
         if (number < 0.6) nextPlaceble = cookies[0];
-        else if (number < 0.8) nextPlaceble = cookies[4];
-        else if (number < 0.9) nextPlaceble = cookies[1];
+        else if (number < 0.7) nextPlaceble = cookies[4];
+        else if (number < 0.8) nextPlaceble = cookies[1];
+        else if (number < 0.9) nextPlaceble = cookies[5];
         else if (number < 0.95) nextPlaceble = cookies[2];
         else nextPlaceble = cookies[3];
     }
@@ -78,7 +80,7 @@ public class GameManager : MonoBehaviour
             clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
             int x = clickedCellPosition.x;
             int y = clickedCellPosition.y;
-            if (clickedCellPosition == cellsArray[height-1, 0].cellPosition)
+            if (clickedCellPosition == cellsArray[height-1, 0].cellPosition) //логика тарелки
             {
                 if(cellsArray[y, x].isEmpty)
                 {
@@ -93,10 +95,10 @@ public class GameManager : MonoBehaviour
                 }
                 Debug.Log("clicked on plate");
             }
-            else if (cellsArray[y, x].isEmpty)
+            else if (cellsArray[y, x].isEmpty) 
             {
                 Placing();
-                GingerbreadManAliveBehavior();
+                GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
                 GeneratePlacibleObject();
                 
             }
@@ -146,10 +148,9 @@ public class GameManager : MonoBehaviour
     {
         bool[,] visited = new bool[height, width];
         int count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
-        while (count >= 3) //can merge
+        while (count >= 3)
         {
-            // Здесь не нужно заново получать x, y из mouse position,
-            // лучше использовать координаты клетки cell
+
             int x = cell.cellPosition.x;
             int y = cell.cellPosition.y;
 
@@ -182,6 +183,7 @@ public class GameManager : MonoBehaviour
     private int CheckNearest(int x, int y, Cell.CookieType targetType, bool[,] visited)
     {
         if (y == height - 1 && x == 0) return 0;
+        if (targetType == Cell.CookieType.gingerbreadJumperAlive) return 0;
         if (targetType == Cell.CookieType.gingerbreadManAlive) return 0;
         if (!InRange(x, y)) return 0;
         if (visited[y, x]) return 0;
@@ -201,6 +203,7 @@ public class GameManager : MonoBehaviour
     private void GingerbreadManAliveBehavior()
     {
         List<Cell> gingerbreadList = new();
+        List<Cell> gingerbreadJumperList = new();
 
         for (int y = 0; y < height; y++)
         {
@@ -210,10 +213,30 @@ public class GameManager : MonoBehaviour
                 {
                     gingerbreadList.Add(cellsArray[y, x]);
                 }
+                if (cellsArray[y, x].cookieType == Cell.CookieType.gingerbreadJumperAlive)
+                {
+                    gingerbreadJumperList.Add(cellsArray[y, x]);
+                }
             }
         }
 
-        foreach (Cell cell in gingerbreadList)
+        foreach(Cell cell in gingerbreadJumperList)  // для прыгунов
+        {
+            usedIndices = new bool[width * height];
+            Vector3Int randTilePosition = GetRandomEmptyTile();
+            cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+            {
+                isEmpty = true,
+                isPlayable = true,
+                type = Cell.CellType.empty,
+                cookieType = Cell.CookieType.unknown,
+                cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
+            };
+            cell.cellPosition = randTilePosition;
+            cellsArray[randTilePosition.y, randTilePosition.x] = cell;
+        }
+
+        foreach (Cell cell in gingerbreadList) // для человечков
         {
             Vector3 dir = MoveRandomDirection(cell);
             Vector3Int newPos = cell.cellPosition + Vector3Int.RoundToInt(dir);
@@ -221,7 +244,7 @@ public class GameManager : MonoBehaviour
             if (cellsArray[cell.cellPosition.y, cell.cellPosition.x].type != Cell.CellType.plate) //если не в тарелке то использует логику
             {
                 Debug.Log(cellsArray[cell.cellPosition.y, cell.cellPosition.x].type);
-                if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty)
+                if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty && cellsArray[newPos.y, newPos.x].type != Cell.CellType.plate) //блок для передвижения
                 {
                     cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
                     {
@@ -240,7 +263,7 @@ public class GameManager : MonoBehaviour
                     bool[,] checkedGingerbreadMan = new bool[height, width];
                     if (CheckNearestGingerbreadMans(cell, checkedGingerbreadMan))
                     {
-
+                        Debug.Log("сработало    ");
                     }
                     else
                     {
@@ -261,6 +284,43 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    private Vector3Int GetRandomEmptyTile()
+    {
+        int totalTiles = width * height;
+
+        // Проверка: все использованы
+        if (usedIndices.All(b => b))
+        {
+            Debug.LogError("All tiles have been used!");
+            return new Vector3Int(-1, -1, 0);
+        }
+
+        int rand, row, col;
+        int attempts = 0;
+
+        do
+        {
+            rand = random.Next(0, totalTiles);
+            attempts++;
+
+        } while (usedIndices[rand]);
+
+        usedIndices[rand] = true;
+
+        row = rand / width;
+        col = (width - (rand % width))-1;
+        Debug.Log(row + "   " + col);
+
+        if (cellsArray[col, row].isEmpty && cellsArray[col, row].type != Cell.CellType.plate)
+        {
+            return cellsArray[col, row].cellPosition;
+        }
+        else
+        {
+            return GetRandomEmptyTile();
         }
     }
 
@@ -291,22 +351,26 @@ public class GameManager : MonoBehaviour
             {
                 var neighbor = cellsArray[newY, newX];
                 if (neighbor.cookieType == Cell.CookieType.gingerbreadManAlive &&
-                    MoveRandomDirection(neighbor) != Vector3.zero)
+                    MoveRandomDirection(neighbor) != Vector3.zero)    //условие возможного движения
                 {
                     return true;
                 }
-                else if(neighbor.cookieType == Cell.CookieType.gingerbreadManAlive &&
-                    MoveRandomDirection(neighbor) == Vector3.zero)
+                if (neighbor.cookieType == Cell.CookieType.gingerbreadJumperAlive) //условие присутствия прыгуна рядом
                 {
-                    if(CheckNearestGingerbreadMans(neighbor, checkedGingerbreadMan))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
+            else if (neighbor.cookieType == Cell.CookieType.gingerbreadManAlive &&
+                MoveRandomDirection(neighbor) == Vector3.zero)   //условие возможного движения для соседа
+            {
+                if (CheckNearestGingerbreadMans(neighbor, checkedGingerbreadMan))
+                {
+                    return true;
+                }
+            }
             }
         }
 
-        return false;
+        return false; // если соседи не могут двигаться
     }
     private Vector3 MoveRandomDirection(Cell cell)
     {
@@ -345,6 +409,7 @@ public class GameManager : MonoBehaviour
             "pancake" => Cell.CookieType.pankeki,
             "cake" => Cell.CookieType.cake,
             "gingerbreadManAlive" => Cell.CookieType.gingerbreadManAlive,
+            "gingerbreadJumperAlive" => Cell.CookieType.gingerbreadJumperAlive,
             _ => Cell.CookieType.unknown,
         };
     }
