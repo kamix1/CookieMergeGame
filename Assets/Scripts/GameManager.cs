@@ -222,18 +222,21 @@ public class GameManager : MonoBehaviour
 
         foreach(Cell cell in gingerbreadJumperList)  // для прыгунов
         {
-            usedIndices = new bool[width * height];
-            Vector3Int randTilePosition = GetRandomEmptyTile();
-            cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+            if (cell.type != Cell.CellType.plate)
             {
-                isEmpty = true,
-                isPlayable = true,
-                type = Cell.CellType.empty,
-                cookieType = Cell.CookieType.unknown,
-                cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
-            };
-            cell.cellPosition = randTilePosition;
-            cellsArray[randTilePosition.y, randTilePosition.x] = cell;
+                usedIndices = new bool[width * height];
+                Vector3Int randTilePosition = GetRandomEmptyTile();
+                cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+                {
+                    isEmpty = true,
+                    isPlayable = true,
+                    type = Cell.CellType.empty,
+                    cookieType = Cell.CookieType.unknown,
+                    cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
+                };
+                cell.cellPosition = randTilePosition;
+                cellsArray[randTilePosition.y, randTilePosition.x] = cell;
+            }
         }
 
         foreach (Cell cell in gingerbreadList) // для человечков
@@ -263,7 +266,7 @@ public class GameManager : MonoBehaviour
                     bool[,] checkedGingerbreadMan = new bool[height, width];
                     if (CheckNearestGingerbreadMans(cell, checkedGingerbreadMan))
                     {
-                        Debug.Log("сработало    ");
+                        
                     }
                     else
                     {
@@ -424,6 +427,7 @@ public class GameManager : MonoBehaviour
             Cell.CookieType.pankeki => "pancake",
             Cell.CookieType.cake => "cake",
             Cell.CookieType.gingerbreadManAlive => "gingerbreadManAlive",
+            Cell.CookieType.gingerbreadJumperAlive => "gingerbreadJumperAlive",
             _ => "unknown",
         };
     }
