@@ -68,6 +68,10 @@ public class GameManager : MonoBehaviour
             clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
             int x = clickedCellPosition.x;
             int y = clickedCellPosition.y;
+            if (clickedCellPosition == cellsArray[0, 0].cellPosition)
+            {
+
+            }
             if (cellsArray[y, x].isEmpty)
             {
                 Placing();
@@ -148,6 +152,7 @@ public class GameManager : MonoBehaviour
 
     private int CheckNearest(int x, int y, Cell.CookieType targetType, bool[,] visited)
     {
+        if (targetType == Cell.CookieType.gingerbreadManAlive) return 0;
         if (!InRange(x, y)) return 0;
         if (visited[y, x]) return 0;
         if (cellsArray[y, x].cookieType != targetType) return 0;
@@ -199,21 +204,85 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                cell.cookieType = Cell.CookieType.gingerbreadMan;
-                Merge(cell);
+                bool[,] checkedGingerbreadMan = new bool[height, width];
+                if(CheckNearestGingerbreadMans(cell, checkedGingerbreadMan))
+                {
+
+                }
+                else
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            if(checkedGingerbreadMan[y,x] == true)
+                            {
+                                Debug.Log("x = " + x + "y =" + y);
+                                cellsArray[y, x].cookieType = Cell.CookieType.gingerbreadMan;
+                                cellsArray[y, x].isEmpty = false;
+                            }
+                        }
+                    }
+                    Merge(cell);
+                    gameField.UpdateVisual(cellsArray);
+                }
             }
         }
     }
 
+    private bool CheckNearestGingerbreadMans(Cell cell, bool[,] checkedGingerbreadMan)
+    {
+        int x = cell.cellPosition.x;
+        int y = cell.cellPosition.y;
+
+        if (!InRange(x, y)) return false;
+        if (checkedGingerbreadMan[y, x]) return false;
+        checkedGingerbreadMan[y, x] = true;
+
+        List<Vector3Int> directions = new List<Vector3Int>()
+        {
+            new Vector3Int(1, 0, 0),
+            new Vector3Int(-1, 0, 0),
+            new Vector3Int(0, 1, 0),
+            new Vector3Int(0, -1, 0)
+        };
+
+        foreach (Vector3Int dir in directions)
+        {
+            Vector3Int newPos = cell.cellPosition + dir;
+            int newX = newPos.x;
+            int newY = newPos.y;
+
+            if (InRange(newX, newY))
+            {
+                var neighbor = cellsArray[newY, newX];
+                if (neighbor.cookieType == Cell.CookieType.gingerbreadManAlive &&
+                    MoveRandomDirection(neighbor) != Vector3.zero)
+                {
+                    return true;
+                }
+                else if(neighbor.cookieType == Cell.CookieType.gingerbreadManAlive &&
+                    MoveRandomDirection(neighbor) == Vector3.zero)
+                {
+                    if(CheckNearestGingerbreadMans(neighbor, checkedGingerbreadMan))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
     private Vector3 MoveRandomDirection(Cell cell)
     {
         List<Vector3> directions = new List<Vector3>()
-    {
-        new Vector3(1, 0, 0),
-        new Vector3(-1, 0, 0),  
-        new Vector3(0, 1, 0),   
-        new Vector3(0, -1, 0)   
-    };
+        {
+            new Vector3(1, 0, 0),
+            new Vector3(-1, 0, 0),  
+            new Vector3(0, 1, 0),   
+            new Vector3(0, -1, 0)   
+        };
 
         for (int i = directions.Count - 1; i > 0; i--)
         {

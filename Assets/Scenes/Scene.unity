@@ -282,8 +282,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3623aff6cec535e498acc4e774d79871, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  height: 5
-  width: 5
+  height: 6
+  width: 6
   gameField: {fileID: 1764680177}
 --- !u!4 &1031043179
 Transform:
