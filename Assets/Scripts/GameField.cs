@@ -21,6 +21,8 @@ public class GameField : MonoBehaviour
     [SerializeField] private Tile tileGingerbreadJumperAlive;
     [SerializeField] private Tile tileGingerbreadManCoctail;
     [SerializeField] private Tile tileGingerbreadManSet;
+    [SerializeField] private Tile tileMixer;
+    [SerializeField] private Tile tileMicrowave;
 
     public Tilemap Tilemap => tilemap;
     public Tilemap TilemapOverlay => tilemapOverlay;
@@ -147,6 +149,14 @@ public class GameField : MonoBehaviour
         else if (name == "gingerbreadJumperAlive")
         {
             return tileGingerbreadJumperAlive;
+        }
+        else if (name == "mixer")
+        {
+            return tileMixer;
+        }
+        else if (name == "microwave")
+        {
+            return tileMicrowave;
         }
         else
         {

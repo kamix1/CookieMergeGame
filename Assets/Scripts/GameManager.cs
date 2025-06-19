@@ -12,11 +12,21 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private GameField gameField;
     private string nextPlaceble;
-    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive", "gingerbreadJumperAlive" };
+    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive", "gingerbreadJumperAlive", "mixer", "microwave" };
     Vector3Int clickedCellPosition;
     private System.Random random = new System.Random();
     private bool[] usedIndices;
 
+    private bool IsPlayableType(Cell.CookieType type)
+    {
+        return type != Cell.CookieType.gingerbreadManAlive &&
+               type != Cell.CookieType.gingerbreadJumperAlive &&
+               type != Cell.CookieType.unknown &&
+               type != Cell.CookieType.mixer &&
+               type != Cell.CookieType.microwave;
+    }
+
+    Cell.CookieType[] types = (Cell.CookieType[])System.Enum.GetValues(typeof(Cell.CookieType));
     void Start()
     {
         cellsArray = new Cell[height, width];
@@ -57,12 +67,14 @@ public class GameManager : MonoBehaviour
         System.Random random = new System.Random();
         double number = random.NextDouble();
 
-        if (number < 0.6) nextPlaceble = cookies[0];
-        else if (number < 0.7) nextPlaceble = cookies[4];
-        else if (number < 0.8) nextPlaceble = cookies[1];
-        else if (number < 0.9) nextPlaceble = cookies[5];
-        else if (number < 0.95) nextPlaceble = cookies[2];
-        else nextPlaceble = cookies[3];
+        if (number < 0.5) nextPlaceble = cookies[0];//cookie
+        else if (number < 0.6) nextPlaceble = cookies[4]; //gingerbreadMan
+        else if (number < 0.7) nextPlaceble = cookies[1]; //toast
+        else if (number < 0.77) nextPlaceble = cookies[5]; //gingerbredJumper
+        else if (number < 0.85) nextPlaceble = cookies[6]; //mixer
+        else if (number < 0.9) nextPlaceble = cookies[7]; // microwave
+        else if (number < 0.95) nextPlaceble = cookies[2]; //mafin
+        else nextPlaceble = cookies[3]; // pancake
     }
 
     public string GetNextPlacible()
@@ -80,9 +92,9 @@ public class GameManager : MonoBehaviour
             clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
             int x = clickedCellPosition.x;
             int y = clickedCellPosition.y;
-            if (clickedCellPosition == cellsArray[height-1, 0].cellPosition) //логика тарелки
+            if (clickedCellPosition == cellsArray[height - 1, 0].cellPosition) //логика тарелки
             {
-                if(cellsArray[y, x].isEmpty)
+                if (cellsArray[y, x].isEmpty)
                 {
                     Placing();
                     GingerbreadManAliveBehavior();
@@ -95,12 +107,24 @@ public class GameManager : MonoBehaviour
                 }
                 Debug.Log("clicked on plate");
             }
-            else if (cellsArray[y, x].isEmpty) 
+            else if (cellsArray[y, x].isEmpty && nextPlaceble != "mixer" && nextPlaceble !="microwave")
             {
                 Placing();
                 GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
                 GeneratePlacibleObject();
-                
+
+            }
+            else if (!cellsArray[y,x].isEmpty && nextPlaceble == "mixer")
+            {
+                Mix(y, x);
+                GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
+                GeneratePlacibleObject();
+            }
+            else if (cellsArray[y, x].isEmpty && nextPlaceble == "microwave")
+            {
+                Microwave(y,x);
+                GingerbreadManAliveBehavior(); 
+                GeneratePlacibleObject();
             }
             gameField.UpdateVisual(cellsArray);
         }
@@ -117,6 +141,45 @@ public class GameManager : MonoBehaviour
                 Debug.Log(cellsArray[y, x].isEmpty);
                 Debug.Log(cellsArray[y, x].cookieType);
             }
+        }
+    }
+
+    private void Microwave(int y, int x)
+    {
+        int indicator = 0;
+        Cell.CookieType temp = cellsArray[y, x].cookieType;
+        for (int i = types.Length-1; i>=0; i--)
+        {
+            if (IsPlayableType(types[i]))
+            {
+                cellsArray[y, x].cookieType = types[i];
+
+                indicator = Merge(cellsArray[y,x], indicator);  //если слилось то индикатор++
+            }
+            if(indicator > 0)
+            {
+                cellsArray[y, x].isPlayable = true;
+                cellsArray[y, x].type = Cell.CellType.cookie;
+                cellsArray[y, x].isEmpty = false;
+                break;
+            }
+            else if(indicator == 0)
+            {
+                cellsArray[y, x].cookieType = temp;
+            }
+        }
+    }
+    private void Mix(int y, int x)
+    {
+        if (cellsArray[y, x].cookieType != Cell.CookieType.gingerbreadManAlive && cellsArray[y, x].cookieType != Cell.CookieType.gingerbreadJumperAlive)
+        {
+            cellsArray[y, x].isEmpty = true;
+            cellsArray[y, x].cookieType = Cell.CookieType.unknown;
+        }
+        else
+        {
+            cellsArray[y, x].cookieType = Cell.CookieType.gingerbreadMan;
+            Merge(cellsArray[y,x]);
         }
     }
 
@@ -150,7 +213,6 @@ public class GameManager : MonoBehaviour
         int count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
         while (count >= 3)
         {
-
             int x = cell.cellPosition.x;
             int y = cell.cellPosition.y;
 
@@ -179,6 +241,41 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private int Merge(Cell cell, int indicator)
+    {
+        bool[,] visited = new bool[height, width];
+        int count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
+        while (count >= 3)
+        {
+            indicator++;
+            int x = cell.cellPosition.x;
+            int y = cell.cellPosition.y;
+
+            if (InRange(x, y))
+            {
+                for (int i = height - 1; i >= 0; i--)
+                {
+                    for (int j = 0; j < width; j++)
+                    {
+                        if (cellsArray[i, j] == cell)
+                        {
+                            cell.Merge();
+                            continue;
+                        }
+                        else if (visited[i, j] && cellsArray[i, j] != cell)
+                        {
+                            cellsArray[i, j].cookieType = Cell.CookieType.unknown;
+                            cellsArray[i, j].isEmpty = true;
+                        }
+                    }
+                }
+            }
+            visited = new bool[height, width];
+            count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
+            
+        }
+        return indicator;
+    }
 
     private int CheckNearest(int x, int y, Cell.CookieType targetType, bool[,] visited)
     {
@@ -413,6 +510,8 @@ public class GameManager : MonoBehaviour
             "cake" => Cell.CookieType.cake,
             "gingerbreadManAlive" => Cell.CookieType.gingerbreadManAlive,
             "gingerbreadJumperAlive" => Cell.CookieType.gingerbreadJumperAlive,
+            "mixer" => Cell.CookieType.mixer,
+            "microwave" => Cell.CookieType.microwave,
             _ => Cell.CookieType.unknown,
         };
     }
@@ -428,6 +527,8 @@ public class GameManager : MonoBehaviour
             Cell.CookieType.cake => "cake",
             Cell.CookieType.gingerbreadManAlive => "gingerbreadManAlive",
             Cell.CookieType.gingerbreadJumperAlive => "gingerbreadJumperAlive",
+            Cell.CookieType.mixer => "mixer",
+            Cell.CookieType.microwave => "microwave",
             _ => "unknown",
         };
     }

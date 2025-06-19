@@ -601,6 +601,8 @@ MonoBehaviour:
   tileGingerbreadJumperAlive: {fileID: 11400000, guid: 91e70012c4fcbb14ba73ffa9a927f29c, type: 2}
   tileGingerbreadManCoctail: {fileID: 11400000, guid: 7330fed4dc3e8cd429207228cf3d9b33, type: 2}
   tileGingerbreadManSet: {fileID: 11400000, guid: 9a26478a6acca0340a7e903a225843bf, type: 2}
+  tileMixer: {fileID: 11400000, guid: dc3ff65ef06e3254c932e20b2ea3af23, type: 2}
+  tileMicrowave: {fileID: 11400000, guid: 174bb9c89bcf75b4e8ebd3a79d92bdf9, type: 2}
   tileEmpty: {fileID: 11400000, guid: af5d9c44c425cf440a25d139b37e6ae8, type: 2}
   tilePlate: {fileID: 11400000, guid: 210b8d1cf169e8b4490b0ba0fb08f9ab, type: 2}
   cookie: {fileID: 11400000, guid: 0ede90b22401970409bfa83804a80b6f, type: 2}

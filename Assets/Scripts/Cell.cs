@@ -21,6 +21,8 @@ public class Cell
         doubleGlazurCake,
         gingerbreadManAlive,
         gingerbreadJumperAlive,
+        mixer,
+        microwave,
         gingerbreadMan,
         gingerbreadManCoctail,
         gingerbreadManSet,
@@ -33,7 +35,7 @@ public class Cell
         {
             cookieType++;
         }
-        if (cookieType > CookieType.gingerbreadJumperAlive && cookieType < CookieType.unknown)
+        if (cookieType > CookieType.microwave && cookieType < CookieType.unknown)
         {
             cookieType++;
         }
