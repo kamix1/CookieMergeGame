@@ -102,6 +102,10 @@ public class GameField : MonoBehaviour
                 return tileGingerbreadManAlive;
             case Cell.CookieType.gingerbreadJumperAlive:
                 return tileGingerbreadJumperAlive;
+            case Cell.CookieType.microwave:
+                return tileMicrowave;
+            case Cell.CookieType.mixer:
+                return tileMixer;
             case Cell.CookieType.gingerbreadMan:
                 return tileGingerbreadMan;
             case Cell.CookieType.gingerbreadManCoctail:
