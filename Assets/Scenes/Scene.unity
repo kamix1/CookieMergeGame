@@ -285,6 +285,8 @@ MonoBehaviour:
   height: 6
   width: 6
   gameField: {fileID: 1764680177}
+  sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  prefab: {fileID: 3074044807320175616, guid: e529f7519b0d4f04bb993c5f07b08eb1, type: 3}
 --- !u!4 &1031043179
 Transform:
   m_ObjectHideFlags: 0
@@ -603,6 +605,20 @@ MonoBehaviour:
   tileGingerbreadManSet: {fileID: 11400000, guid: 9a26478a6acca0340a7e903a225843bf, type: 2}
   tileMixer: {fileID: 11400000, guid: dc3ff65ef06e3254c932e20b2ea3af23, type: 2}
   tileMicrowave: {fileID: 11400000, guid: 174bb9c89bcf75b4e8ebd3a79d92bdf9, type: 2}
+  spriteCookie: {fileID: 21300000, guid: 99b4c15fea8204c499c7caa0ae92315a, type: 3}
+  spriteToast: {fileID: 21300000, guid: da4be0f0d28864c46a906edb37b02d09, type: 3}
+  spriteMafin: {fileID: 21300000, guid: dcd364efeff4c5740a92bebf175b2d15, type: 3}
+  spritePancake: {fileID: 21300000, guid: cf0cfed287a080042901e92841ca2044, type: 3}
+  spriteCake: {fileID: 21300000, guid: c5433355766db674ab9f064c155337fb, type: 3}
+  spriteDoubleCake: {fileID: 21300000, guid: bcc5ed5eb4ac72b4690b852e2b4006ac, type: 3}
+  spriteDoubleGlazurCake: {fileID: 21300000, guid: 06d38dd0960c3754681f4ed9fdac3d01, type: 3}
+  spriteGingerbreadMan: {fileID: 21300000, guid: 230285bb5ec53d54ba2e09266e164af2, type: 3}
+  spriteGingerbreadManAlive: {fileID: 21300000, guid: ab64819f779738d4da8c8f00dc78bd26, type: 3}
+  spriteGingerbreadJumperAlive: {fileID: 21300000, guid: ef0d9efd898ed8241a8b5adaeb59067d, type: 3}
+  spriteGingerbreadManCoctail: {fileID: 21300000, guid: 317002f0cd102d346b7d67ccd06e1d19, type: 3}
+  spriteGingerbreadManSet: {fileID: 21300000, guid: 71e5864ba061a5f488ab7bbe9a705a22, type: 3}
+  spriteMixer: {fileID: 21300000, guid: d09c30c875ccd1f4583d002278d855f7, type: 3}
+  spriteMicrowave: {fileID: 21300000, guid: bfd3abf1fee5ddd4cb5468764e9bf987, type: 3}
   tileEmpty: {fileID: 11400000, guid: af5d9c44c425cf440a25d139b37e6ae8, type: 2}
   tilePlate: {fileID: 11400000, guid: 210b8d1cf169e8b4490b0ba0fb08f9ab, type: 2}
   cookie: {fileID: 11400000, guid: 0ede90b22401970409bfa83804a80b6f, type: 2}

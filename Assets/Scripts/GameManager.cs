@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     private Cell[,] cellsArray;
+    private CellVisual[,] cellsArrayVisual;
     [SerializeField] private int height;
     [SerializeField] private int width;
     [SerializeField] private GameField gameField;
@@ -16,6 +17,8 @@ public class GameManager : MonoBehaviour
     Vector3Int clickedCellPosition;
     private System.Random random = new System.Random();
     private bool[] usedIndices;
+    [SerializeField] private Sprite sprite;
+    [SerializeField] private GameObject prefab;
 
     private bool IsPlayableType(Cell.CookieType type)
     {
@@ -30,9 +33,16 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         cellsArray = new Cell[height, width];
+        cellsArrayVisual = new CellVisual[height, width];
         GenerateEmptyField(height, width);
+        GenerateVisualField(height, width);
         gameField.UpdateTileMap(cellsArray);
         GeneratePlacibleObject();
+    }
+
+    public string GetNextPlacible()
+    {
+        return nextPlaceble;
     }
 
     private void GenerateEmptyField(int height, int width)
@@ -62,6 +72,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void GenerateVisualField(int height, int width)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                
+                cellsArrayVisual[y,x] = new CellVisual(cellsArray[y,x].cellPosition, null, prefab);
+            }
+        }
+    }
+
     private void GeneratePlacibleObject()
     {
         System.Random random = new System.Random();
@@ -77,10 +99,6 @@ public class GameManager : MonoBehaviour
         else nextPlaceble = cookies[3]; // pancake
     }
 
-    public string GetNextPlacible()
-    {
-        return nextPlaceble;
-    }
 
     void Update()
     {
@@ -99,7 +117,7 @@ public class GameManager : MonoBehaviour
                     Placing();
                     GingerbreadManAliveBehavior();
                     GeneratePlacibleObject();
-                    gameField.UpdateVisual(cellsArray);
+                    gameField.UpdateVisual(cellsArray, cellsArrayVisual);
                 }
                 else
                 {
@@ -126,7 +144,7 @@ public class GameManager : MonoBehaviour
                 GingerbreadManAliveBehavior(); 
                 GeneratePlacibleObject();
             }
-            gameField.UpdateVisual(cellsArray);
+            gameField.UpdateVisual(cellsArray, cellsArrayVisual);
         }
 
         if (Input.GetMouseButtonDown(1))
@@ -380,7 +398,7 @@ public class GameManager : MonoBehaviour
                             }
                         }
                         Merge(cell);
-                        gameField.UpdateVisual(cellsArray);
+                        gameField.UpdateVisual(cellsArray, cellsArrayVisual);
                     }
                 }
             }

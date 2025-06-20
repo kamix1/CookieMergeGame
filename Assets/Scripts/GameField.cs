@@ -5,6 +5,7 @@ using UnityEngine.Tilemaps;
 
 public class GameField : MonoBehaviour
 {
+    public static GameField Instance { get; private set; }
 
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private Tilemap tilemapOverlay;
@@ -24,6 +25,20 @@ public class GameField : MonoBehaviour
     [SerializeField] private Tile tileMixer;
     [SerializeField] private Tile tileMicrowave;
 
+    [SerializeField] private Sprite spriteCookie;
+    [SerializeField] private Sprite spriteToast;
+    [SerializeField] private Sprite spriteMafin;
+    [SerializeField] private Sprite spritePancake;
+    [SerializeField] private Sprite spriteCake;
+    [SerializeField] private Sprite spriteDoubleCake;
+    [SerializeField] private Sprite spriteDoubleGlazurCake;
+    [SerializeField] private Sprite spriteGingerbreadMan;
+    [SerializeField] private Sprite spriteGingerbreadManAlive;
+    [SerializeField] private Sprite spriteGingerbreadJumperAlive;
+    [SerializeField] private Sprite spriteGingerbreadManCoctail;
+    [SerializeField] private Sprite spriteGingerbreadManSet;
+    [SerializeField] private Sprite spriteMixer;
+    [SerializeField] private Sprite spriteMicrowave;
     public Tilemap Tilemap => tilemap;
     public Tilemap TilemapOverlay => tilemapOverlay;
     public Tilemap TilemapVisual => tilemapVisual;
@@ -34,7 +49,7 @@ public class GameField : MonoBehaviour
     // Start is called before the first frame update
     private void Awake()
     {
-        
+        Instance = this;
     }
 
 
@@ -54,17 +69,16 @@ public class GameField : MonoBehaviour
         }
     }
 
-    public void UpdateVisual(Cell[,] state)
+    public void UpdateVisual(Cell[,] cellsArray, CellVisual[,] cellVisuals)
     {
-        int width = state.GetLength(0);
-        int height = state.GetLength(1);
+        int width = cellsArray.GetLength(0);
+        int height = cellsArray.GetLength(1);
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                Cell cell = state[x, y];
-                TilemapVisual.SetTile(cell.cellPosition, GetTileVisual(cell));
+                cellVisuals[x,y].SetSprite(GetSpriteVisual(cellsArray[x, y]));
             }
         }
     }
@@ -113,6 +127,43 @@ public class GameField : MonoBehaviour
             case Cell.CookieType.gingerbreadManSet:
                 return tileGingerbreadManSet;
             default: return null;
+        }
+    }
+
+    public Sprite GetSpriteVisual(Cell cell)
+    {
+        switch (cell.cookieType)
+        {
+            case Cell.CookieType.cookie:
+                return spriteCookie;
+            case Cell.CookieType.toast:
+                return spriteToast;
+            case Cell.CookieType.mafin:
+                return spriteMafin;
+            case Cell.CookieType.pankeki:
+                return spritePancake;
+            case Cell.CookieType.cake:
+                return spriteCake;
+            case Cell.CookieType.doubleCake:
+                return spriteDoubleCake;
+            case Cell.CookieType.doubleGlazurCake:
+                return spriteDoubleGlazurCake;
+            case Cell.CookieType.gingerbreadManAlive:
+                return spriteGingerbreadManAlive;
+            case Cell.CookieType.gingerbreadJumperAlive:
+                return spriteGingerbreadJumperAlive;
+            case Cell.CookieType.microwave:
+                return spriteMicrowave;
+            case Cell.CookieType.mixer:
+                return spriteMixer;
+            case Cell.CookieType.gingerbreadMan:
+                return spriteGingerbreadMan;
+            case Cell.CookieType.gingerbreadManCoctail:
+                return spriteGingerbreadManCoctail;
+            case Cell.CookieType.gingerbreadManSet:
+                return spriteGingerbreadManSet;
+            default:
+                return null;
         }
     }
 
