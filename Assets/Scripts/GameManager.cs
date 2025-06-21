@@ -130,13 +130,13 @@ public class GameManager : MonoBehaviour
                 Placing();
                 GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
                 GeneratePlacibleObject();
-
             }
             else if (!cellsArray[y,x].isEmpty && nextPlaceble == "mixer")
             {
                 Mix(y, x);
                 GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
                 GeneratePlacibleObject();
+                gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
             }
             else if (cellsArray[y, x].isEmpty && nextPlaceble == "microwave")
             {
@@ -223,7 +223,6 @@ public class GameManager : MonoBehaviour
             clickedCell.cookieType = Metamorfosis(nextPlaceble);
             if (clickedCell.cookieType == Cell.CookieType.gingerbreadManAlive || clickedCell.cookieType == Cell.CookieType.gingerbreadJumperAlive)
             {
-                Debug.Log("sprite =" + cellsArrayVisual[y, x].spriteRenderer.sprite);
                 gameField.UpdateVisualGingerbreads(cellsArray,cellsArrayVisual);
             }
 
@@ -235,6 +234,8 @@ public class GameManager : MonoBehaviour
     {
         bool[,] visited = new bool[height, width];
         int count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
+        if(count<3)
+            gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
         while (count >= 3)
         {
             int x = cell.cellPosition.x;
@@ -253,6 +254,9 @@ public class GameManager : MonoBehaviour
                         }
                         else if (visited[i, j] && cellsArray[i, j] != cell)
                         {
+                            CellVisual startCellVisual = cellsArrayVisual[i, j];
+                            CellVisual targetCellVisual = cellsArrayVisual[cell.cellPosition.y, cell.cellPosition.x];
+                            StartCoroutine(startCellVisual.MergeAnimation(startCellVisual, targetCellVisual, 0.2f));
                             cellsArray[i, j].cookieType = Cell.CookieType.unknown;
                             cellsArray[i, j].isEmpty = true;
                         }
@@ -288,6 +292,9 @@ public class GameManager : MonoBehaviour
                         }
                         else if (visited[i, j] && cellsArray[i, j] != cell)
                         {
+                            CellVisual startCellVisual = cellsArrayVisual[i, j];
+                            CellVisual targetCellVisual = cellsArrayVisual[cell.cellPosition.y, cell.cellPosition.x];
+                            StartCoroutine(startCellVisual.MergeAnimation(startCellVisual, targetCellVisual, 0.2f));
                             cellsArray[i, j].cookieType = Cell.CookieType.unknown;
                             cellsArray[i, j].isEmpty = true;
                         }
@@ -347,6 +354,9 @@ public class GameManager : MonoBehaviour
             {
                 usedIndices = new bool[width * height];
                 Vector3Int randTilePosition = GetRandomEmptyTile();
+                CellVisual startCellVisual = cellsArrayVisual[cell.cellPosition.y, cell.cellPosition.x];
+                CellVisual targetCellVisul = cellsArrayVisual[randTilePosition.y, randTilePosition.x];
+                StartCoroutine(MoveJumperThenUpdate(startCellVisual, targetCellVisul, 0.5f));
                 cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
                 {
                     isEmpty = true,
@@ -419,6 +429,18 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine(startCell.MoveToPosition(startCell, targetCell, duration));
         gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
     }
+
+    public IEnumerator MergeThenUpdate(CellVisual startCell, CellVisual targetCell, float duration)
+    {
+        yield return StartCoroutine(startCell.MergeAnimation(startCell, targetCell, duration));
+        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+    } 
+    public IEnumerator MoveJumperThenUpdate(CellVisual startCell, CellVisual targetCell, float duration)
+    {
+        yield return StartCoroutine(startCell.MoveJumperToPosition(startCell, targetCell, duration));
+        gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
+    }
+
 
     private Vector3Int GetRandomEmptyTile()
     {
