@@ -29,4 +29,35 @@ public class CellVisual
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = sprite; 
     }
+
+
+    public IEnumerator MoveToPosition(CellVisual startCell, CellVisual targetCell, float duration)
+    {
+        CellVisual cell = new CellVisual(
+            startCell.cellPosition,
+            startCell.spriteRenderer.sprite,
+            startCell.gameObject
+        );
+
+        startCell.spriteRenderer.sprite = null;
+
+        Vector3 startPos = startCell.gameObject.transform.position;
+        Vector3 targetPos = targetCell.gameObject.transform.position;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / duration;
+            cell.gameObject.transform.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
+
+        cell.gameObject.transform.position = targetPos;
+        cell.Destroy();
+    }
+    public void Destroy()
+    {
+        UnityEngine.Object.Destroy(gameObject);
+    }
 }

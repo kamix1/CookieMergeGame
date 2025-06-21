@@ -69,7 +69,7 @@ public class GameField : MonoBehaviour
         }
     }
 
-    public void UpdateVisual(Cell[,] cellsArray, CellVisual[,] cellVisuals)
+    public void UpdateVisualCookies(Cell[,] cellsArray, CellVisual[,] cellVisuals)
     {
         int width = cellsArray.GetLength(0);
         int height = cellsArray.GetLength(1);
@@ -78,10 +78,27 @@ public class GameField : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
+                if(cellsArray[x,y].cookieType != Cell.CookieType.gingerbreadManAlive && cellsArray[x, y].cookieType != Cell.CookieType.gingerbreadJumperAlive)
                 cellVisuals[x,y].SetSprite(GetSpriteVisual(cellsArray[x, y]));
             }
         }
     }
+    public void UpdateVisualGingerbreads(Cell[,] cellsArray, CellVisual[,] cellVisuals)
+    {
+        int width = cellsArray.GetLength(0);
+        int height = cellsArray.GetLength(1);
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (cellsArray[x, y].cookieType == Cell.CookieType.gingerbreadManAlive || cellsArray[x, y].cookieType == Cell.CookieType.gingerbreadJumperAlive)
+                    cellVisuals[x, y].SetSprite(GetSpriteVisual(cellsArray[x, y]));
+            }
+        }
+    }
+
+
 
     public Tile GetTile(Cell cell)
     {

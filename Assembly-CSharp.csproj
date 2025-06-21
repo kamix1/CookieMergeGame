@@ -59,11 +59,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\VisualPlacing.cs" />
+    <Compile Include="Assets\Scripts\CellVisual.cs" />
     <Compile Include="Assets\Scripts\Cell.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\Greed.cs" />
     <Compile Include="Assets\Scripts\GameField.cs" />
-    <Compile Include="Assets\Scripts\CellVisual.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
                     Placing();
                     GingerbreadManAliveBehavior();
                     GeneratePlacibleObject();
-                    gameField.UpdateVisual(cellsArray, cellsArrayVisual);
+                    gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                 }
                 else
                 {
@@ -144,7 +144,7 @@ public class GameManager : MonoBehaviour
                 GingerbreadManAliveBehavior(); 
                 GeneratePlacibleObject();
             }
-            gameField.UpdateVisual(cellsArray, cellsArrayVisual);
+            gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
         }
 
         if (Input.GetMouseButtonDown(1))
@@ -221,6 +221,12 @@ public class GameManager : MonoBehaviour
             if(clickedCell.type != Cell.CellType.plate)
             clickedCell.type = Cell.CellType.cookie;
             clickedCell.cookieType = Metamorfosis(nextPlaceble);
+            if (clickedCell.cookieType == Cell.CookieType.gingerbreadManAlive || clickedCell.cookieType == Cell.CookieType.gingerbreadJumperAlive)
+            {
+                Debug.Log("sprite =" + cellsArrayVisual[y, x].spriteRenderer.sprite);
+                gameField.UpdateVisualGingerbreads(cellsArray,cellsArrayVisual);
+            }
+
             Merge(clickedCell);
         }
     }
@@ -361,9 +367,12 @@ public class GameManager : MonoBehaviour
 
             if (cellsArray[cell.cellPosition.y, cell.cellPosition.x].type != Cell.CellType.plate) //если не в тарелке то использует логику
             {
-                Debug.Log(cellsArray[cell.cellPosition.y, cell.cellPosition.x].type);
                 if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty && cellsArray[newPos.y, newPos.x].type != Cell.CellType.plate) //блок для передвижения
                 {
+                    Debug.Log("used");
+                    CellVisual startCellVisual = cellsArrayVisual[cell.cellPosition.y, cell.cellPosition.x];
+                    CellVisual targetCellVisul = cellsArrayVisual[newPos.y, newPos.x];
+                    StartCoroutine(MoveThenUpdate(startCellVisual, targetCellVisul, 0.5f));
                     cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
                     {
                         isEmpty = true,
@@ -398,11 +407,17 @@ public class GameManager : MonoBehaviour
                             }
                         }
                         Merge(cell);
-                        gameField.UpdateVisual(cellsArray, cellsArrayVisual);
+                        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                     }
                 }
             }
         }
+    }
+
+    public IEnumerator MoveThenUpdate(CellVisual startCell, CellVisual targetCell, float duration)
+    {
+        yield return StartCoroutine(startCell.MoveToPosition(startCell, targetCell, duration));
+        gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
     }
 
     private Vector3Int GetRandomEmptyTile()
@@ -430,7 +445,6 @@ public class GameManager : MonoBehaviour
 
         row = rand / width;
         col = (width - (rand % width))-1;
-        Debug.Log(row + "   " + col);
 
         if (cellsArray[col, row].isEmpty && cellsArray[col, row].type != Cell.CellType.plate)
         {
