@@ -19,7 +19,12 @@ public class GameManager : MonoBehaviour
     private bool[] usedIndices;
     [SerializeField] private Sprite sprite;
     [SerializeField] private GameObject prefab;
+    private float ScaleRange;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
     private bool IsPlayableType(Cell.CookieType type)
     {
         return type != Cell.CookieType.gingerbreadManAlive &&
@@ -32,6 +37,7 @@ public class GameManager : MonoBehaviour
     Cell.CookieType[] types = (Cell.CookieType[])System.Enum.GetValues(typeof(Cell.CookieType));
     void Start()
     {
+        ScaleRange = 0f;
         cellsArray = new Cell[height, width];
         cellsArrayVisual = new CellVisual[height, width];
         GenerateEmptyField(height, width);
@@ -123,7 +129,7 @@ public class GameManager : MonoBehaviour
                 {
                     SwapPlateCookie(cellsArray[y, x]);
                 }
-                Debug.Log("clicked on plate");
+                gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
             }
             else if (cellsArray[y, x].isEmpty && nextPlaceble != "mixer" && nextPlaceble !="microwave")
             {
@@ -145,6 +151,7 @@ public class GameManager : MonoBehaviour
                 GeneratePlacibleObject();
             }
             gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+            
         }
 
         if (Input.GetMouseButtonDown(1))
@@ -225,9 +232,11 @@ public class GameManager : MonoBehaviour
             {
                 gameField.UpdateVisualGingerbreads(cellsArray,cellsArrayVisual);
             }
-
+            if (clickedCell.type != Cell.CellType.plate)
+                ScoreManager.Instance.IncreaseScore(ScoreManager.Instance.CookieTypeToScore(clickedCell.cookieType));
             Merge(clickedCell);
         }
+
     }
 
     private void Merge(Cell cell)
@@ -250,6 +259,7 @@ public class GameManager : MonoBehaviour
                         if (cellsArray[i, j] == cell)
                         {
                             cell.Merge();
+                            ScoreManager.Instance.IncreaseScore(ScoreManager.Instance.CookieTypeToScore(cell.cookieType));
                             continue;
                         }
                         else if (visited[i, j] && cellsArray[i, j] != cell)
@@ -288,6 +298,7 @@ public class GameManager : MonoBehaviour
                         if (cellsArray[i, j] == cell)
                         {
                             cell.Merge();
+                            ScoreManager.Instance.IncreaseScore(ScoreManager.Instance.CookieTypeToScore(cell.cookieType));
                             continue;
                         }
                         else if (visited[i, j] && cellsArray[i, j] != cell)
@@ -553,6 +564,16 @@ public class GameManager : MonoBehaviour
 
         return Vector3.zero;
     }
+
+    public int GetWidth()
+    {
+        return width;
+    }
+
+    public int GetHeight()
+    {
+        return height;
+    }
     private Cell.CookieType Metamorfosis(string str)
     {
         return str switch
@@ -600,6 +621,18 @@ public class GameManager : MonoBehaviour
             if (hoveredCell.isEmpty)
             {
                 Tile previewTile = gameField.GetPreviewTileFor(nextPlaceble);
+
+                //if(ScaleRange < 0f) переделать под геймобджект
+                //{
+                //    ScaleRange += Time.deltaTime;
+                //    previewTile.transform.local += ScaleRange;
+                //}
+                //else if(ScaleRange > 1f)
+                //{
+                //    ScaleRange += Time.deltaTime;
+                //    previewTile.transform.lossyScale -= ScaleRange;
+                //}
+                
                 gameField.ShowPreviewTile(clickedCellPosition, previewTile);
             }
             else
@@ -617,4 +650,6 @@ public class GameManager : MonoBehaviour
     {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
+
+    
 }

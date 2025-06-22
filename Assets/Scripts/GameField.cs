@@ -98,7 +98,14 @@ public class GameField : MonoBehaviour
         }
     }
 
+    public Vector3 GetGridCenter(int width, int height)
+    {
+        int centerX = width / 2;
+        int centerY = height / 2;
 
+        Vector3 centerWorldPos = Tilemap.CellToWorld(new Vector3Int(centerX, centerY, 0));
+        return centerWorldPos;
+    }
 
     public Tile GetTile(Cell cell)
     {
