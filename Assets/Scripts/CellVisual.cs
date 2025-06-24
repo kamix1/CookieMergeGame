@@ -59,7 +59,6 @@ public class CellVisual
 
     public IEnumerator MergeAnimation(CellVisual startCell, CellVisual targetCell, float duration)
     {
-        Debug.Log("mergeAnimation");
         CellVisual cell = new CellVisual(
             startCell.cellPosition,
             startCell.spriteRenderer.sprite,

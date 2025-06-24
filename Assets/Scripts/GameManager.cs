@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int height;
     [SerializeField] private int width;
     [SerializeField] private GameField gameField;
+    [SerializeField] private Button resetButton;
     private string nextPlaceble;
     private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive", "gingerbreadJumperAlive", "mixer", "microwave" };
     Vector3Int clickedCellPosition;
@@ -19,10 +21,12 @@ public class GameManager : MonoBehaviour
     private bool[] usedIndices;
     [SerializeField] private Sprite sprite;
     [SerializeField] private GameObject prefab;
+    [SerializeField] private Canvas gameOverCanvas;
     private float ScaleRange;
 
     private void Awake()
     {
+        gameOverCanvas.gameObject.SetActive(false);
         Instance = this;
     }
     private bool IsPlayableType(Cell.CookieType type)
@@ -38,12 +42,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         ScaleRange = 0f;
-        cellsArray = new Cell[height, width];
         cellsArrayVisual = new CellVisual[height, width];
-        GenerateEmptyField(height, width);
-        GenerateVisualField(height, width);
-        gameField.UpdateTileMap(cellsArray);
-        GeneratePlacibleObject();
+        resetButton.onClick.AddListener(NewGame);
+        NewGame();
+
     }
 
     public string GetNextPlacible()
@@ -53,6 +55,7 @@ public class GameManager : MonoBehaviour
 
     private void GenerateEmptyField(int height, int width)
     {
+        cellsArray = new Cell[height, width];
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -84,7 +87,10 @@ public class GameManager : MonoBehaviour
         {
             for (int x = 0; x < width; x++)
             {
-                
+                if (cellsArrayVisual[y, x]?.gameObject != null)
+                {
+                    GameObject.Destroy(cellsArrayVisual[y, x].gameObject);
+                }
                 cellsArrayVisual[y,x] = new CellVisual(cellsArray[y,x].cellPosition, null, prefab);
             }
         }
@@ -110,7 +116,7 @@ public class GameManager : MonoBehaviour
     {
         PreviewFunction();
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !isGameOver())
         {
             Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
@@ -134,41 +140,71 @@ public class GameManager : MonoBehaviour
             else if (cellsArray[y, x].isEmpty && nextPlaceble != "mixer" && nextPlaceble !="microwave")
             {
                 Placing();
+                gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                 GingerbreadManAliveBehavior(); // логика прыгунов и пр€ничных человечков
                 GeneratePlacibleObject();
             }
             else if (!cellsArray[y,x].isEmpty && nextPlaceble == "mixer")
             {
                 Mix(y, x);
+                gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                 GingerbreadManAliveBehavior(); // логика прыгунов и пр€ничных человечков
                 GeneratePlacibleObject();
-                gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
             }
             else if (cellsArray[y, x].isEmpty && nextPlaceble == "microwave")
             {
                 Microwave(y,x);
+                gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                 GingerbreadManAliveBehavior(); 
                 GeneratePlacibleObject();
             }
             gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
             
         }
+        else if (isGameOver())
+        {
+            GameOver();
+        }
 
         if (Input.GetMouseButtonDown(1))
         {
-            Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
-            int x = clickedCellPosition.x;
-            int y = clickedCellPosition.y;
-
-            if (InRange(x, y))
-            {
-                Debug.Log(cellsArray[y, x].isEmpty);
-                Debug.Log(cellsArray[y, x].cookieType);
-            }
+            NewGame();
+            
         }
     }
 
+    public void NewGame()
+    {
+        Debug.Log("worked");
+        gameOverCanvas.gameObject.SetActive(false);
+        GenerateEmptyField(height,width);
+        GenerateVisualField(height, width);
+        gameField.UpdateTileMap(cellsArray);
+        GeneratePlacibleObject();
+        ScoreManager.Instance.CheckAndSaveHighScore();
+        ScoreManager.Instance.SetHighScoreText();
+        ScoreManager.Instance.resetScore();
+    }
+
+    private bool isGameOver()
+    {
+        return !isEmptyTiles() && nextPlaceble != "mixer" && cellsArray[height - 1, 0].cookieType/*plate*/ != Cell.CookieType.mixer;
+    }
+
+    private bool isEmptyTiles()
+    {
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (cellsArray[y, x].isEmpty)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;        
+    }
     private void Microwave(int y, int x)
     {
         int indicator = 0;
@@ -208,6 +244,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void GameOver()
+    {
+        gameOverCanvas.gameObject.SetActive(true);
+    }
     private void SwapPlateCookie(Cell plate)
     {
         Cell.CookieType currentPlateCookieType = plate.cookieType;
@@ -341,6 +381,7 @@ public class GameManager : MonoBehaviour
 
     private void GingerbreadManAliveBehavior()
     {
+        bool gingerbreadJumpersCanMove = true;
         List<Cell> gingerbreadList = new();
         List<Cell> gingerbreadJumperList = new();
 
@@ -361,23 +402,40 @@ public class GameManager : MonoBehaviour
 
         foreach(Cell cell in gingerbreadJumperList)  // дл€ прыгунов
         {
-            if (cell.type != Cell.CellType.plate)
+            if (cell.type != Cell.CellType.plate && gingerbreadJumpersCanMove)
             {
                 usedIndices = new bool[width * height];
                 Vector3Int randTilePosition = GetRandomEmptyTile();
-                CellVisual startCellVisual = cellsArrayVisual[cell.cellPosition.y, cell.cellPosition.x];
-                CellVisual targetCellVisul = cellsArrayVisual[randTilePosition.y, randTilePosition.x];
-                StartCoroutine(MoveJumperThenUpdate(startCellVisual, targetCellVisul, 0.5f));
-                cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+                if (randTilePosition != new Vector3Int(-1, -1, 0)) //если есть куда перемещатьс€.
                 {
-                    isEmpty = true,
-                    isPlayable = true,
-                    type = Cell.CellType.empty,
-                    cookieType = Cell.CookieType.unknown,
-                    cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
-                };
-                cell.cellPosition = randTilePosition;
-                cellsArray[randTilePosition.y, randTilePosition.x] = cell;
+                    CellVisual startCellVisual = cellsArrayVisual[cell.cellPosition.y, cell.cellPosition.x];
+                    CellVisual targetCellVisual = cellsArrayVisual[randTilePosition.y, randTilePosition.x];
+                    StartCoroutine(MoveJumperThenUpdate(startCellVisual, targetCellVisual, 0.5f));
+                    cellsArray[cell.cellPosition.y, cell.cellPosition.x] = new Cell()
+                    {
+                        isEmpty = true,
+                        isPlayable = true,
+                        type = Cell.CellType.empty,
+                        cookieType = Cell.CookieType.unknown,
+                        cellPosition = new Vector3Int(cell.cellPosition.x, cell.cellPosition.y)
+                    };
+                    cell.cellPosition = randTilePosition;
+                    cellsArray[randTilePosition.y, randTilePosition.x] = cell;
+                }
+                else //если некуда переместитс€ 
+                {
+                    gingerbreadJumpersCanMove = false;
+                }
+            }
+        }
+        if(gingerbreadJumpersCanMove == false)
+        {
+            foreach (Cell cell in gingerbreadJumperList)  // дл€ прыгунов
+            {
+                cellsArray[cell.cellPosition.y, cell.cellPosition.x].cookieType = Cell.CookieType.gingerbreadMan;
+                cellsArray[cell.cellPosition.y, cell.cellPosition.x].isEmpty = false;
+                Merge(cell);
+                gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
             }
         }
 
@@ -421,7 +479,6 @@ public class GameManager : MonoBehaviour
                             {
                                 if (checkedGingerbreadMan[y, x] == true)
                                 {
-                                    Debug.Log("x = " + x + "y =" + y);
                                     cellsArray[y, x].cookieType = Cell.CookieType.gingerbreadMan;
                                     cellsArray[y, x].isEmpty = false;
                                 }
@@ -460,7 +517,6 @@ public class GameManager : MonoBehaviour
         // ѕроверка: все использованы
         if (usedIndices.All(b => b))
         {
-            Debug.LogError("All tiles have been used!");
             return new Vector3Int(-1, -1, 0);
         }
 
@@ -618,7 +674,7 @@ public class GameManager : MonoBehaviour
         if (InRange(x, y))
         {
             Cell hoveredCell = cellsArray[y, x];
-            if (hoveredCell.isEmpty)
+            if (hoveredCell.isEmpty || nextPlaceble == "mixer")
             {
                 Tile previewTile = gameField.GetPreviewTileFor(nextPlaceble);
 

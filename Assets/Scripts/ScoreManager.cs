@@ -7,6 +7,8 @@ public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance { get; private set; }
     [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI gameOverScoreText;
+    [SerializeField] private TextMeshProUGUI highScoreText;
     private int score;
 
     private void Awake()
@@ -24,6 +26,16 @@ public class ScoreManager : MonoBehaviour
 
     }
 
+    public void resetScore()
+    {
+        score = 0;
+        UpdateScoreUI();
+    }
+    public void SetHighScoreText()
+    {
+
+        highScoreText.text = PlayerPrefs.GetInt("HighScore", 0).ToString();
+    }
     public void IncreaseScore(int increase)
     {
         score += increase;
@@ -33,6 +45,18 @@ public class ScoreManager : MonoBehaviour
     private void UpdateScoreUI()
     {
         scoreText.text = score.ToString();
+        gameOverScoreText.text = score.ToString();
+    }
+
+    public void CheckAndSaveHighScore()
+    {
+        int currentHighScore = PlayerPrefs.GetInt("HighScore", 0);
+        if (score > currentHighScore)
+        {
+            PlayerPrefs.SetInt("HighScore", score);
+            PlayerPrefs.Save(); // обязательно сохраняем
+            Debug.Log("New High Score: " + score);
+        }
     }
 
     public int CookieTypeToScore(Cell.CookieType cookieType)
