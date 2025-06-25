@@ -39,6 +39,7 @@ public class GameField : MonoBehaviour
     [SerializeField] private Sprite spriteGingerbreadManSet;
     [SerializeField] private Sprite spriteMixer;
     [SerializeField] private Sprite spriteMicrowave;
+    [SerializeField] private Sprite spriteMicrowaveCoctail;
     public Tilemap Tilemap => tilemap;
     public Tilemap TilemapOverlay => tilemapOverlay;
     public Tilemap TilemapVisual => tilemapVisual;
@@ -178,6 +179,8 @@ public class GameField : MonoBehaviour
                 return spriteGingerbreadJumperAlive;
             case Cell.CookieType.microwave:
                 return spriteMicrowave;
+            case Cell.CookieType.microwaveCoctail:
+                return spriteMicrowaveCoctail;
             case Cell.CookieType.mixer:
                 return spriteMixer;
             case Cell.CookieType.gingerbreadMan:
@@ -236,6 +239,14 @@ public class GameField : MonoBehaviour
         else if (name == "microwave")
         {
             return tileMicrowave;
+        }
+        else if (name == "set")
+        {
+            return tileGingerbreadManSet;
+        }
+        else if (name == "dgc")
+        {
+            return tileDoubleGlazurCake;
         }
         else
         {

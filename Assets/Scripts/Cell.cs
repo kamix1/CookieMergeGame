@@ -22,6 +22,7 @@ public class Cell
         gingerbreadManAlive,
         gingerbreadJumperAlive,
         mixer,
+        microwaveCoctail,
         microwave,
         gingerbreadMan,
         gingerbreadManCoctail,
@@ -35,7 +36,7 @@ public class Cell
         {
             cookieType++;
         }
-        if (cookieType > CookieType.microwave && cookieType < CookieType.unknown)
+        if (cookieType > CookieType.microwave && cookieType < CookieType.gingerbreadManSet)
         {
             cookieType++;
         }

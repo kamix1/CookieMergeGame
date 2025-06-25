@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameField gameField;
     [SerializeField] private Button resetButton;
     private string nextPlaceble;
-    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive", "gingerbreadJumperAlive", "mixer", "microwave" };
+    private string[] cookies = { "cookie", "toast", "mafin", "pancake", "gingerbreadManAlive", "gingerbreadJumperAlive", "mixer", "microwave", "set", "dgc" };
     Vector3Int clickedCellPosition;
     private System.Random random = new System.Random();
     private bool[] usedIndices;
@@ -168,8 +168,11 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            NewGame();
-            
+            Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
+            int x = clickedCellPosition.x;
+            int y = clickedCellPosition.y;
+            Debug.Log(cellsArray[y, x].cookieType);
         }
     }
 
@@ -226,7 +229,8 @@ public class GameManager : MonoBehaviour
             }
             else if(indicator == 0)
             {
-                cellsArray[y, x].cookieType = temp;
+                cellsArray[y, x].cookieType = Cell.CookieType.microwaveCoctail;
+                cellsArray[y, x].isEmpty = false;
             }
         }
     }
@@ -363,6 +367,9 @@ public class GameManager : MonoBehaviour
     {
         if (y == height - 1 && x == 0) return 0;
         if (targetType == Cell.CookieType.gingerbreadJumperAlive) return 0;
+        if (targetType == Cell.CookieType.doubleGlazurCake) return 0;
+        if (targetType == Cell.CookieType.gingerbreadManSet) return 0;
+        if (targetType == Cell.CookieType.microwaveCoctail) return 0;
         if (targetType == Cell.CookieType.gingerbreadManAlive) return 0;
         if (!InRange(x, y)) return 0;
         if (visited[y, x]) return 0;
@@ -643,6 +650,8 @@ public class GameManager : MonoBehaviour
             "gingerbreadJumperAlive" => Cell.CookieType.gingerbreadJumperAlive,
             "mixer" => Cell.CookieType.mixer,
             "microwave" => Cell.CookieType.microwave,
+            "set" => Cell.CookieType.gingerbreadManSet,
+            "dgc" => Cell.CookieType.doubleGlazurCake,
             _ => Cell.CookieType.unknown,
         };
     }

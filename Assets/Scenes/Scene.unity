@@ -1932,9 +1932,10 @@ MonoBehaviour:
   spriteGingerbreadManAlive: {fileID: 21300000, guid: ab64819f779738d4da8c8f00dc78bd26, type: 3}
   spriteGingerbreadJumperAlive: {fileID: 21300000, guid: ef0d9efd898ed8241a8b5adaeb59067d, type: 3}
   spriteGingerbreadManCoctail: {fileID: 21300000, guid: 317002f0cd102d346b7d67ccd06e1d19, type: 3}
-  spriteGingerbreadManSet: {fileID: 21300000, guid: 71e5864ba061a5f488ab7bbe9a705a22, type: 3}
+  spriteGingerbreadManSet: {fileID: 21300000, guid: 62f83d1625bea644c85d3d8381838501, type: 3}
   spriteMixer: {fileID: 21300000, guid: d09c30c875ccd1f4583d002278d855f7, type: 3}
   spriteMicrowave: {fileID: 21300000, guid: bfd3abf1fee5ddd4cb5468764e9bf987, type: 3}
+  spriteMicrowaveCoctail: {fileID: 21300000, guid: bb1c7c81f990b3b43a1f3e2d76a2c9d2, type: 3}
   tileEmpty: {fileID: 11400000, guid: af5d9c44c425cf440a25d139b37e6ae8, type: 2}
   tilePlate: {fileID: 11400000, guid: 210b8d1cf169e8b4490b0ba0fb08f9ab, type: 2}
   cookie: {fileID: 11400000, guid: 0ede90b22401970409bfa83804a80b6f, type: 2}
