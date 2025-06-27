@@ -501,7 +501,6 @@ public class GameManager : MonoBehaviour
             {
                 if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty && cellsArray[newPos.y, newPos.x].type != Cell.CellType.plate) //блок для передвижения
                 {
-                    Debug.Log("used");
                     CellVisual startCellVisual = cellsArrayVisual[cell.cellPosition.y, cell.cellPosition.x];
                     CellVisual targetCellVisul = cellsArrayVisual[newPos.y, newPos.x];
                     StartCoroutine(MoveThenUpdate(startCellVisual, targetCellVisul, 0.5f));

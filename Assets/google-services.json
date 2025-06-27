@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "903128697954",
+    "firebase_url": "https://cookiemergegame-default-rtdb.firebaseio.com",
+    "project_id": "cookiemergegame",
+    "storage_bucket": "cookiemergegame.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903128697954:android:996e30eeae2e4b7c25553b",
+        "android_client_info": {
+          "package_name": "com.himli.cookieMergeGame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEhOU7tzYQReM5CT4m4wagp_SFTp5tP5g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
