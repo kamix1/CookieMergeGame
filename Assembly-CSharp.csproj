@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\ScoreManager.cs" />
     <Compile Include="Assets\Scripts\Greed.cs" />
     <Compile Include="Assets\Scripts\GameField.cs" />
+    <Compile Include="Assets\Scripts\LeaderBordButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
