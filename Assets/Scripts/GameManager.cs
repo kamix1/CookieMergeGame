@@ -81,6 +81,30 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void GenerateStartObjects()
+    {
+        int randWidth, randHeight, randCount;
+        randCount = random.Next(5, 8);
+
+        for (int i = 0; i < randCount; i++)
+        {
+            randWidth = random.Next(0, width);
+            randHeight = random.Next(0, height);
+            if (cellsArray[randHeight, randWidth].isEmpty && cellsArray[randHeight, randWidth].type != Cell.CellType.plate && IsPlayableType(Metamorfosis(GetNextPlacible())))
+            {
+                Debug.Log(randHeight + " " + randWidth);
+                
+                Placing(randWidth,randHeight);
+                GeneratePlacibleObject();
+            }
+            else
+            {
+                GeneratePlacibleObject();
+                i--;
+            }
+        }
+        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+    }
     private void GenerateVisualField(int height, int width)
     {
         for (int y = 0; y < height; y++)
@@ -98,7 +122,6 @@ public class GameManager : MonoBehaviour
 
     private void GeneratePlacibleObject()
     {
-        System.Random random = new System.Random();
         double number = random.NextDouble();
 
         if (number < 0.5) nextPlaceble = cookies[0];//cookie
@@ -178,12 +201,12 @@ public class GameManager : MonoBehaviour
 
     public void NewGame()
     {
-        Debug.Log("worked");
         gameOverCanvas.gameObject.SetActive(false);
         GenerateEmptyField(height,width);
         GenerateVisualField(height, width);
         gameField.UpdateTileMap(cellsArray);
         GeneratePlacibleObject();
+        GenerateStartObjects();
         ScoreManager.Instance.CheckAndSaveHighScore();
         ScoreManager.Instance.SetHighScoreText();
         ScoreManager.Instance.resetScore();
@@ -283,6 +306,26 @@ public class GameManager : MonoBehaviour
 
     }
 
+    private void Placing(int x, int y)
+    {
+
+        if (InRange(x, y) && cellsArray[y, x].isEmpty)
+        {
+            Cell clickedCell = cellsArray[y, x];
+            clickedCell.isEmpty = false;
+            if (clickedCell.type != Cell.CellType.plate)
+                clickedCell.type = Cell.CellType.cookie;
+            clickedCell.cookieType = Metamorfosis(nextPlaceble);
+            if (clickedCell.cookieType == Cell.CookieType.gingerbreadManAlive || clickedCell.cookieType == Cell.CookieType.gingerbreadJumperAlive)
+            {
+                gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
+            }
+            if (clickedCell.type != Cell.CellType.plate)
+                ScoreManager.Instance.IncreaseScore(ScoreManager.Instance.CookieTypeToScore(clickedCell.cookieType));
+            Merge(clickedCell);
+        }
+
+    }
     private void Merge(Cell cell)
     {
         bool[,] visited = new bool[height, width];
