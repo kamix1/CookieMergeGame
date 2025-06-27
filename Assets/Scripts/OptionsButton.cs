@@ -1,0 +1,20 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class OptionsButton : MonoBehaviour
+{
+    [SerializeField] private Button optionsButton;
+    [SerializeField] private GameObject optionsMenu;
+
+    private void Start()
+    {
+        optionsButton.onClick.AddListener(OptionsButtonOnClick);
+    }
+
+    private void OptionsButtonOnClick()
+    {
+        optionsMenu.SetActive(true);
+    }
+}

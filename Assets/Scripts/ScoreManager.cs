@@ -87,7 +87,7 @@ public class ScoreManager : MonoBehaviour
             return;
         }
 
-        string key = FireBaseInit.database.RootReference.Child("leaderboard").Push().Key;
+        string key = AuthManager.User.UserId;
 
         var entry = new Dictionary<string, object>();
         entry["username"] = username;
