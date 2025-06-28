@@ -135,70 +135,75 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        PreviewFunction();
-
-        if (Input.GetMouseButtonDown(0) && !isGameOver())
+        if (PauseMenu.Instance != null && !PauseMenu.Instance.Paused())
         {
-            Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
-            int x = clickedCellPosition.x;
-            int y = clickedCellPosition.y;
-            if (InRange(x,y)) {
-                if (clickedCellPosition == cellsArray[height - 1, 0].cellPosition) //логика тарелки
+            PreviewFunction();
+
+            if (Input.GetMouseButtonDown(0) && !isGameOver())
+            {
+                Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
+                int x = clickedCellPosition.x;
+                int y = clickedCellPosition.y;
+                if (InRange(x, y))
                 {
-                    if (cellsArray[y, x].isEmpty)
+                    if (clickedCellPosition == cellsArray[height - 1, 0].cellPosition) //логика тарелки
+                    {
+                        if (cellsArray[y, x].isEmpty)
+                        {
+                            Placing();
+                            GingerbreadManAliveBehavior();
+                            GeneratePlacibleObject();
+                            gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+                        }
+                        else
+                        {
+                            SwapPlateCookie(cellsArray[y, x]);
+                        }
+                        gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
+                    }
+                    else if (cellsArray[y, x].isEmpty && nextPlaceble != "mixer" && nextPlaceble != "microwave")
                     {
                         Placing();
+                        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+                        GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
+                        GeneratePlacibleObject();
+                    }
+                    else if (!cellsArray[y, x].isEmpty && nextPlaceble == "mixer")
+                    {
+                        Mix(y, x);
+                        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+                        GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
+                        GeneratePlacibleObject();
+                    }
+                    else if (cellsArray[y, x].isEmpty && nextPlaceble == "microwave")
+                    {
+                        Microwave(y, x);
+                        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                         GingerbreadManAliveBehavior();
                         GeneratePlacibleObject();
-                        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                     }
                     else
                     {
-                        SwapPlateCookie(cellsArray[y, x]);
+
                     }
-                    gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
                 }
-                else if (cellsArray[y, x].isEmpty && nextPlaceble != "mixer" && nextPlaceble != "microwave")
-                {
-                    Placing();
-                    gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
-                    GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
-                    GeneratePlacibleObject();
-                }
-                else if (!cellsArray[y, x].isEmpty && nextPlaceble == "mixer")
-                {
-                    Mix(y, x);
-                    gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
-                    GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
-                    GeneratePlacibleObject();
-                }
-                else if (cellsArray[y, x].isEmpty && nextPlaceble == "microwave")
-                {
-                    Microwave(y, x);
-                    gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
-                    GingerbreadManAliveBehavior();
-                    GeneratePlacibleObject();
-                }
-                else {
+                gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
 
-                }
             }
-            gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
-            
-        }
-        else if (isGameOver())
-        {
-            GameOver();
-        }
+            else if (isGameOver())
+            {
+                GameOver();
+            }
 
-        if (Input.GetMouseButtonDown(1))
-        {
-            Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
-            int x = clickedCellPosition.x;
-            int y = clickedCellPosition.y;
-            Debug.Log(cellsArray[y, x].cookieType);
+            if (Input.GetMouseButtonDown(1))
+            {
+                Vector3 clickWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
+                int x = clickedCellPosition.x;
+                int y = clickedCellPosition.y;
+                Debug.Log(cellsArray[y, x].cookieType);
+            }
         }
     }
 

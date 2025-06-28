@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class OptionsButton : MonoBehaviour
 {
     [SerializeField] private Button optionsButton;
-    [SerializeField] private GameObject optionsMenu;
 
     private void Start()
     {
@@ -15,6 +14,6 @@ public class OptionsButton : MonoBehaviour
 
     private void OptionsButtonOnClick()
     {
-        optionsMenu.SetActive(true);
+        PauseMenu.Instance.SetPaused(true);
     }
 }
