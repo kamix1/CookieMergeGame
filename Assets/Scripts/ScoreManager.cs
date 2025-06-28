@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using Firebase.Extensions;
 using Firebase.Database;
+using System;
 
 public class ScoreManager : MonoBehaviour
 {
@@ -13,16 +14,18 @@ public class ScoreManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI leaderboardText;
     [SerializeField] private TextMeshProUGUI highScoreText;
     private int score;
+    private int highScore;
 
     private void Awake()
     {
         Instance = this;
-        score = 0;
+        
     }
 
     private void Start()
     {
         UpdateScoreUI();
+        SetHighScoreText();
     }
     private void Update()
     {
@@ -36,8 +39,21 @@ public class ScoreManager : MonoBehaviour
     }
     public void SetHighScoreText()
     {
-        UploadScore( AuthManager.User.Email.Split('@')[0] , PlayerPrefs.GetInt("HighScore", 0));
-        highScoreText.text = PlayerPrefs.GetInt("HighScore", 0).ToString();
+        StartCoroutine(WaitAndLoadHighScore());
+    }
+
+    private IEnumerator WaitAndLoadHighScore()
+    {
+        while (!FireBaseInit.IsReady)
+        {
+            yield return null;
+        }
+        GetUserScore(AuthManager.User.UserId, score =>
+        {
+            highScore = score;
+            highScoreText.text = highScore.ToString();
+            Debug.Log("highScore: " + highScore);
+        });
     }
 
     public void GetTopScores(int count = 10)
@@ -79,16 +95,56 @@ public class ScoreManager : MonoBehaviour
                 }
             });
     }
+
+    public void GetUserScore(string username, Action<int> onResult)
+    {
+        if (!FireBaseInit.IsReady)
+        {
+            Debug.LogWarning("Firebase не готов!");
+            onResult?.Invoke(-1); // или 0, или любой дефолт
+            return;
+        }
+
+        FireBaseInit.database.RootReference
+            .Child("leaderboard")
+            .Child(username)
+            .GetValueAsync()
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    var snapshot = task.Result;
+
+                    if (snapshot.Exists && snapshot.HasChild("score"))
+                    {
+                        int score = int.Parse(snapshot.Child("score").Value.ToString());
+                        onResult?.Invoke(score);
+                    }
+                    else
+                    {
+                        Debug.Log("Пользователь не найден или нет очков.");
+                        onResult?.Invoke(0);
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Ошибка при получении очков: " + task.Exception);
+                    onResult?.Invoke(-1);
+                }
+            });
+        
+    }
     public void UploadScore(string username, int score)
     {
+        
         if (!FireBaseInit.IsReady)
         {
             Debug.LogWarning("Firebase ещё не готов!");
             return;
         }
 
-        string key = AuthManager.User.UserId;
 
+        string key = AuthManager.User.UserId;
         var entry = new Dictionary<string, object>();
         entry["username"] = username;
         entry["score"] = score;
