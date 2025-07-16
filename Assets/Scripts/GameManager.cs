@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,12 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public static event EventHandler OnPlacing;
+    public static event EventHandler OnMerge;
+    public static event EventHandler OnMergeGingerbreadMans;
+    public static event EventHandler OnMicrowaved;
+    public static event EventHandler OnMixered;
+    public static event EventHandler OnPlatePlacing;
     public static GameManager Instance { get; private set; }
     private Cell[,] cellsArray;
     private CellVisual[,] cellsArrayVisual;
@@ -160,9 +167,10 @@ public class GameManager : MonoBehaviour
                         {
                             SwapPlateCookie(cellsArray[y, x]);
                         }
+                        OnPlatePlacing?.Invoke(this, EventArgs.Empty);
                         gameField.UpdateVisualGingerbreads(cellsArray, cellsArrayVisual);
                     }
-                    else if (cellsArray[y, x].isEmpty && nextPlaceble != "mixer" && nextPlaceble != "microwave")
+                    else if (cellsArray[y, x].isEmpty && nextPlaceble != "mixer" && nextPlaceble != "microwave") //размещение
                     {
                         Placing();
                         gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
@@ -171,6 +179,7 @@ public class GameManager : MonoBehaviour
                     }
                     else if (!cellsArray[y, x].isEmpty && nextPlaceble == "mixer")
                     {
+                        OnMixered?.Invoke(this, EventArgs.Empty);
                         Mix(y, x);
                         gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                         GingerbreadManAliveBehavior(); // логика прыгунов и пряничных человечков
@@ -178,6 +187,7 @@ public class GameManager : MonoBehaviour
                     }
                     else if (cellsArray[y, x].isEmpty && nextPlaceble == "microwave")
                     {
+                        OnMicrowaved?.Invoke(this, EventArgs.Empty);
                         Microwave(y, x);
                         gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
                         GingerbreadManAliveBehavior();
@@ -295,7 +305,6 @@ public class GameManager : MonoBehaviour
         clickedCellPosition = gameField.Tilemap.WorldToCell(clickWorldPosition);
         int x = clickedCellPosition.x;
         int y = clickedCellPosition.y;
-
         if (InRange(x, y) && cellsArray[y, x].isEmpty)
         {
             Cell clickedCell = cellsArray[y, x];
@@ -309,6 +318,8 @@ public class GameManager : MonoBehaviour
             }
             if (clickedCell.type != Cell.CellType.plate)
                 ScoreManager.Instance.IncreaseScore(ScoreManager.Instance.CookieTypeToScore(clickedCell.cookieType));
+            transformGingerbreads();
+            Debug.Log(clickedCell.cookieType);
             Merge(clickedCell);
         }
 
@@ -316,9 +327,9 @@ public class GameManager : MonoBehaviour
 
     private void Placing(int x, int y)
     {
-
         if (InRange(x, y) && cellsArray[y, x].isEmpty)
         {
+            transformGingerbreads();
             Cell clickedCell = cellsArray[y, x];
             clickedCell.isEmpty = false;
             if (clickedCell.type != Cell.CellType.plate)
@@ -336,15 +347,24 @@ public class GameManager : MonoBehaviour
     }
     private void Merge(Cell cell)
     {
+        Debug.Log("слитие");
         bool[,] visited = new bool[height, width];
         int count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
-        if(count<3)
+        Cell.CookieType cellCookieType = cell.cookieType; //sound check
+        if (count < 3)
+        {
             gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+            if (cell.type == Cell.CellType.plate)
+                OnPlatePlacing?.Invoke(this, EventArgs.Empty);
+            else
+            {
+                OnPlacing?.Invoke(this, EventArgs.Empty);
+            }
+        }
         while (count >= 3)
         {
             int x = cell.cellPosition.x;
             int y = cell.cellPosition.y;
-
             if (InRange(x, y))
             {
                 for (int i = height - 1; i >= 0; i--)
@@ -370,8 +390,13 @@ public class GameManager : MonoBehaviour
             }
             visited = new bool[height, width];
             count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
-            
+
+            if (cellCookieType == Cell.CookieType.gingerbreadMan)
+                OnMergeGingerbreadMans?.Invoke(this, EventArgs.Empty);
+            else
+                OnMerge?.Invoke(this, EventArgs.Empty);
         }
+       
     }
 
     private int Merge(Cell cell, int indicator)
@@ -383,7 +408,6 @@ public class GameManager : MonoBehaviour
             indicator++;
             int x = cell.cellPosition.x;
             int y = cell.cellPosition.y;
-
             if (InRange(x, y))
             {
                 for (int i = height - 1; i >= 0; i--)
@@ -409,7 +433,6 @@ public class GameManager : MonoBehaviour
             }
             visited = new bool[height, width];
             count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
-            
         }
         return indicator;
     }
@@ -437,6 +460,64 @@ public class GameManager : MonoBehaviour
         return count;
     }
 
+    private void transformGingerbreads()
+    {
+        bool gingerbreadJumpersCanMove = true;
+        List<Cell> gingerbreadList = new();
+        List<Cell> gingerbreadJumperList = new();
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (cellsArray[y, x].cookieType == Cell.CookieType.gingerbreadManAlive)
+                {
+                    gingerbreadList.Add(cellsArray[y, x]);
+                }
+                if (cellsArray[y, x].cookieType == Cell.CookieType.gingerbreadJumperAlive)
+                {
+                    gingerbreadJumperList.Add(cellsArray[y, x]);
+                }
+            }
+        }
+        foreach (Cell cell in gingerbreadList)
+        {
+            Vector3 dir = MoveRandomDirection(cell);
+            Vector3Int newPos = cell.cellPosition + Vector3Int.RoundToInt(dir);
+
+            if (cellsArray[cell.cellPosition.y, cell.cellPosition.x].type != Cell.CellType.plate) //если не в тарелке то использует логику
+            {
+                if (dir != Vector3.zero && InRange(newPos.x, newPos.y) && cellsArray[newPos.y, newPos.x].isEmpty && cellsArray[newPos.y, newPos.x].type != Cell.CellType.plate) //блок для передвижения
+                {
+
+                }
+                else
+                {
+                    bool[,] checkedGingerbreadMan = new bool[height, width];
+                    if (CheckNearestGingerbreadMans(cell, checkedGingerbreadMan))
+                    {
+
+                    }
+                    else
+                    {
+                        for (int y = 0; y < height; y++)
+                        {
+                            for (int x = 0; x < width; x++)
+                            {
+                                if (checkedGingerbreadMan[y, x] == true)
+                                {
+                                    cellsArray[y, x].cookieType = Cell.CookieType.gingerbreadMan;
+                                    cellsArray[y, x].isEmpty = false;
+                                }
+                            }
+                        }
+                        //Merge(cell);
+                        gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
+                    }
+                }
+            }
+        }
+    }
     private void GingerbreadManAliveBehavior()
     {
         bool gingerbreadJumpersCanMove = true;

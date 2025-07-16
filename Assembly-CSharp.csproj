@@ -68,6 +68,7 @@
     <Compile Include="Assets\Scripts\Auth\RegistrationAutorisation.cs" />
     <Compile Include="Assets\Scripts\PauseMenu.cs" />
     <Compile Include="Assets\Scripts\FireBaseInit.cs" />
+    <Compile Include="Assets\Scripts\SoundManager.cs" />
     <Compile Include="Assets\Scripts\LeaderBoardButton.cs" />
     <Compile Include="Assets\Scripts\GameField.cs" />
     <Compile Include="Assets\Scripts\OptionsButton.cs" />
