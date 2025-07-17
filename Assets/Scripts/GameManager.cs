@@ -198,8 +198,8 @@ public class GameManager : MonoBehaviour
 
                     }
                 }
+                MergeUnmerged();
                 gameField.UpdateVisualCookies(cellsArray, cellsArrayVisual);
-
             }
             else if (isGameOver())
             {
@@ -319,7 +319,6 @@ public class GameManager : MonoBehaviour
             if (clickedCell.type != Cell.CellType.plate)
                 ScoreManager.Instance.IncreaseScore(ScoreManager.Instance.CookieTypeToScore(clickedCell.cookieType));
             transformGingerbreads();
-            Debug.Log(clickedCell.cookieType);
             Merge(clickedCell);
         }
 
@@ -345,9 +344,33 @@ public class GameManager : MonoBehaviour
         }
 
     }
+
+    private void MergeUnmerged()
+    {
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                while (CanMerge(cellsArray[y,x]))
+                {
+                    Merge(cellsArray[y,x]);
+                }
+            }
+        }
+    }
+    private bool CanMerge(Cell cell)
+    {
+        if (cell.cookieType == Cell.CookieType.unknown) return false;
+        bool[,] visited = new bool[height, width];
+        int count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
+        if (count >= 3)
+        {
+            return true;
+        }
+        return false;
+    }
     private void Merge(Cell cell)
     {
-        Debug.Log("слитие");
         bool[,] visited = new bool[height, width];
         int count = CheckNearest(cell.cellPosition.x, cell.cellPosition.y, cell.cookieType, visited);
         Cell.CookieType cellCookieType = cell.cookieType; //sound check
