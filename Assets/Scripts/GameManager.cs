@@ -249,32 +249,89 @@ public class GameManager : MonoBehaviour
         }
         return false;        
     }
+    //private void Microwave(int y, int x)
+    //{
+    //    int indicator = 0;
+    //    Cell.CookieType temp = cellsArray[y, x].cookieType;
+    //    for (int i = types.Length-1; i>=0; i--)
+    //    {
+    //        if (IsPlayableType(types[i]))
+    //        {
+    //            cellsArray[y, x].cookieType = types[i];
+
+    //            indicator = Merge(cellsArray[y,x], indicator);  //если слилось то индикатор++
+    //        }
+    //        if(indicator > 0)
+    //        {
+    //            cellsArray[y, x].isPlayable = true;
+    //            cellsArray[y, x].type = Cell.CellType.cookie;
+    //            cellsArray[y, x].isEmpty = false;
+    //            break;
+    //        }
+    //        else if(indicator == 0)
+    //        {
+    //            cellsArray[y, x].cookieType = Cell.CookieType.microwaveCoctail;
+    //            cellsArray[y, x].isEmpty = false;
+    //        }
+    //    }
+    //}
+
     private void Microwave(int y, int x)
     {
-        int indicator = 0;
-        Cell.CookieType temp = cellsArray[y, x].cookieType;
-        for (int i = types.Length-1; i>=0; i--)
+        for (int i = types.Length - 1; i >= 0; i--)
         {
-            if (IsPlayableType(types[i]))
-            {
-                cellsArray[y, x].cookieType = types[i];
+            if (!IsPlayableType(types[i]))
+                continue;
 
-                indicator = Merge(cellsArray[y,x], indicator);  //если слилось то индикатор++
-            }
-            if(indicator > 0)
+            // ”становить начальный тип
+            cellsArray[y, x].cookieType = types[i];
+
+            if (CanMerge(cellsArray[y, x]))
             {
+                int currentIndex = i;
+                int lastWorkingIndex = i;
+
+                while (currentIndex > 0)
+                {
+                    int lowerIndex = currentIndex - 1;
+
+                    // ѕроверка допустимости понижени€
+                    if (!IsPlayableType(types[lowerIndex]))
+                        break;
+
+                    // ѕонижаем тип
+                    cellsArray[y, x].cookieType = types[lowerIndex];
+
+                    if (CanMerge(cellsArray[y, x]) &&
+                        cellsArray[y, x].cookieType != Cell.CookieType.unknown &&
+                        cellsArray[y, x].cookieType != Cell.CookieType.gingerbreadMan)
+                    {
+                        lastWorkingIndex = lowerIndex;
+                        currentIndex = lowerIndex;
+                    }
+                    else
+                    {
+                        // ƒальше сли€ние уже не работает Ч откатываемс€ на последний рабочий
+                        cellsArray[y, x].cookieType = types[lastWorkingIndex];
+                        break;
+                    }
+                }
+
+                // “еперь выполн€ем Merge на найденном типе
+                Merge(cellsArray[y, x]);
                 cellsArray[y, x].isPlayable = true;
                 cellsArray[y, x].type = Cell.CellType.cookie;
                 cellsArray[y, x].isEmpty = false;
                 break;
             }
-            else if(indicator == 0)
+            else
             {
                 cellsArray[y, x].cookieType = Cell.CookieType.microwaveCoctail;
                 cellsArray[y, x].isEmpty = false;
             }
         }
     }
+
     private void Mix(int y, int x)
     {
         if (cellsArray[y, x].cookieType != Cell.CookieType.gingerbreadManAlive && cellsArray[y, x].cookieType != Cell.CookieType.gingerbreadJumperAlive)

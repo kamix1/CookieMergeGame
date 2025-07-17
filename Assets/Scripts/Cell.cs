@@ -12,6 +12,7 @@ public class Cell
     public bool isEmpty;
     public enum CookieType
     {
+        unknown,
         cookie,
         toast,
         mafin,
@@ -27,7 +28,6 @@ public class Cell
         gingerbreadMan,
         gingerbreadManCoctail,
         gingerbreadManSet,
-        unknown
     }
 
     public void Merge()
